@@ -1,8 +1,12 @@
 "use client";
 
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -11,20 +15,31 @@ const newOfferSchema = z.object({
   url: z.string().url().min(1),
 });
 
-async function submitHandler(data: z.infer<typeof newOfferSchema>) {
+async function submitHandler(
+  data: z.infer<typeof newOfferSchema> & { userId: string }
+) {
   await axios.post("/api/offers", data);
 }
 
 export function useNewOfferForm() {
-  // const { toast } = useToast();
+  const { push } = useRouter();
+  const { toast } = useToast();
+  const [isAddingMultiple, setIsAddingMultiple] = useState(false);
+  const { data: userData } = useSession();
   const { mutate: addOffer, isPending } = useMutation({
     mutationKey: ["newOffer"],
     mutationFn: async (data: z.infer<typeof newOfferSchema>) => {
-      submitHandler(data);
+      if (!userData) {
+        return;
+      }
+      submitHandler({ ...data, userId: userData.user.id! });
     },
     onSuccess: () => {
-      // toast("Offer created successfully", { type: "success" });
-      console.log("Successfully added offer");
+      toast({ description: "Offer added." });
+      form.reset();
+      if (!isAddingMultiple) {
+        push("/");
+      }
     },
   });
 
@@ -36,5 +51,15 @@ export function useNewOfferForm() {
     },
   });
 
-  return { form, addOffer, isPending };
+  function handleIsAddingMultiple() {
+    setIsAddingMultiple((prev) => !prev);
+  }
+
+  return {
+    form,
+    addOffer,
+    isPending,
+    handleIsAddingMultiple,
+    isAddingMultiple,
+  };
 }

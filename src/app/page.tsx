@@ -1,44 +1,11 @@
-"use client";
-
-import axios, { isAxiosError } from "axios";
-import { useCallback, useEffect, useState } from "react";
-import { OfferType } from "../../types/types";
-import NewOfferForm from "@/components/new-offer/NewOfferForm";
-
-type CheckOfferResponse = {
-  newOffers: OfferType[];
-  changedOffers: OfferType[];
-  unchangedOffers: OfferType[];
-};
+import OffersList from "@/components/offers/OffersList";
 
 export default function Home() {
-  // const [offers, setOffers] = useState<CheckOfferResponse>();
-  // const [isLoading, setIsLoading] = useState(true);
-
-  // const fetchOffers = useCallback(async () => {
-  //   try {
-  //     const res = await axios.get("/api/check-offer");
-  //     const data = res.data;
-
-  //     setOffers(data.offers);
-  //     setIsLoading(false);
-  //   } catch (err) {
-  //     setIsLoading(false);
-  //     if (isAxiosError(err)) {
-  //       console.log("Error fetching offers: ", err.message);
-  //     } else {
-  //       console.log("Error fetching offers: ", err);
-  //     }
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   fetchOffers();
-  // }, [fetchOffers]);
-
   return (
-    <div className="">
-      <NewOfferForm />
+    <div className="h-full my-6">
+      <section className="max-w-screen-2xl mx-auto px-4">
+        <OffersList />
+      </section>
     </div>
   );
 }

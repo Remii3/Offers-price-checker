@@ -3,4 +3,6 @@ export type OfferType = {
   name: string;
   url: string;
   lastPrices: string[];
+  currentPrice: string;
+  status: string;
 };
