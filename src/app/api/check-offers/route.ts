@@ -4,6 +4,7 @@ import { isAxiosError } from "axios";
 import { NextResponse } from "next/server";
 import { fetchPrice } from "@/lib/fetchPrice";
 import { OfferType } from "../../../../types/types";
+import { sendNewPriceMail } from "@/lib/mails";
 
 export async function POST(req: Request) {
   try {
@@ -25,11 +26,11 @@ export async function POST(req: Request) {
       });
     }
 
-    const priceResults = await Promise.all(
+    const fetchResults = await Promise.all(
       offers.map(async (offer) => {
         try {
-          const websiteCurrentPrice = await fetchPrice({ url: offer.url });
-          return { offer, websiteCurrentPrice };
+          const websiteCurrentInfo = await fetchPrice({ url: offer.url });
+          return { offer, websiteCurrentInfo };
         } catch (err) {
           if (isAxiosError(err)) {
             console.error(
@@ -44,44 +45,58 @@ export async function POST(req: Request) {
       })
     );
 
-    const bulkOperations = priceResults
-      .filter(({ websiteCurrentPrice }) => websiteCurrentPrice)
-      .map(({ offer, websiteCurrentPrice }) => {
-        const updates: Record<string, any> = {};
-        if (!offer.currentPrice) {
-          // Initial price setup
-          updates.currentPrice = websiteCurrentPrice;
-          updates.status = "changed";
-        } else if (offer.currentPrice !== websiteCurrentPrice) {
-          // Price has changed
-          updates.currentPrice = websiteCurrentPrice;
-          updates.status = "changed";
-          updates.$push = { lastPrices: offer.currentPrice };
-        } else if (
-          offer.lastPrices.at(-1) !== offer.currentPrice &&
-          offer.status === "changed"
-        ) {
-          // Price hasn't changed but lastPrices/status needs updating
-          updates.status = "notChanged";
-          updates.$push = { lastPrices: offer.currentPrice };
-        } else if (
-          offer.currentPrice === websiteCurrentPrice &&
-          (offer.status === "changed" || offer.status === "new")
-        ) {
-          // Mark status as "notChanged"
-          updates.status = "notChanged";
-        }
+    const bulkOperations = [];
+    const failedOffers = [];
 
-        if (Object.keys(updates).length === 0) return null;
+    for (const { offer, websiteCurrentInfo } of fetchResults) {
+      if (!websiteCurrentInfo) {
+        failedOffers.push(offer.url);
+        continue;
+      }
 
-        return {
+      const updates: Record<string, string | { [key: string]: string }> = {};
+
+      if (!websiteCurrentInfo.price) {
+        updates.$push = { lastPrices: offer.currentPrice };
+        updates.currentPrice = "deleted";
+        updates.status = "deleted";
+      } else if (!offer.currentPrice) {
+        updates.currentPrice = websiteCurrentInfo.price;
+        updates.img = websiteCurrentInfo.img;
+        updates.status = "changed";
+      } else if (offer.currentPrice !== websiteCurrentInfo.price) {
+        updates.currentPrice = websiteCurrentInfo.price;
+        updates.status = "changed";
+        updates.img = websiteCurrentInfo.img;
+        updates.$push = { lastPrices: offer.currentPrice };
+
+        sendNewPriceMail({
+          ...offer,
+          lastPrice: offer.currentPrice,
+          currentPrice: websiteCurrentInfo.price || "deleted",
+        });
+      } else if (
+        offer.lastPrices.at(-1) !== offer.currentPrice &&
+        offer.status === "changed"
+      ) {
+        updates.status = "notChanged";
+        updates.$push = { lastPrices: offer.currentPrice };
+      } else if (
+        offer.currentPrice === websiteCurrentInfo.price &&
+        (offer.status === "changed" || offer.status === "new")
+      ) {
+        updates.status = "notChanged";
+      }
+
+      if (Object.keys(updates).length > 0) {
+        bulkOperations.push({
           updateOne: {
             filter: { _id: offer._id },
             update: updates,
           },
-        };
-      })
-      .filter(Boolean);
+        });
+      }
+    }
 
     if (bulkOperations.length > 0) {
       await Offer.bulkWrite(bulkOperations.filter((op) => op !== null));

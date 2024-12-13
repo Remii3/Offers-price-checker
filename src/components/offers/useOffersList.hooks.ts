@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { OfferType } from "../../../types/types";
 import { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ export const FILTER_STATES = [
   { name: "Changed", value: "changed" },
   { name: "Not changed", value: "notChanged" },
   { name: "New", value: "new" },
+  { name: "Deleted", value: "deleted" },
 ];
 
 export const SORT_STATES = [
@@ -24,6 +25,7 @@ export const SORT_STATES = [
 export function useOffersList() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+
   const [isRefreshingPrices, setIsRefreshingPrices] = useState(false);
 
   const router = useRouter();
@@ -33,9 +35,11 @@ export function useOffersList() {
   const [filtersState, setFiltersState] = useState(
     initialFilter || FILTER_STATES[0].value
   );
+
   const [sortState, setSortState] = useState(
     initialSort || SORT_STATES[0].value
   );
+
   const {
     data: offerPages,
     isFetching,
@@ -45,7 +49,7 @@ export function useOffersList() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery<ResponseType, Error>({
-    queryKey: ["offers", sortState, filtersState],
+    queryKey: ["offers"],
     queryFn: async ({ pageParam }) => {
       const res = await axios.get<ResponseType>(`/api/offers`, {
         params: {
@@ -73,7 +77,8 @@ export function useOffersList() {
       sort: sortState,
     });
     router.push(`/?${params.toString()}`, { scroll: false });
-  }, [filtersState, sortState, router]);
+    refetch();
+  }, [filtersState, sortState, router, refetch]);
 
   function changeFilterHandler(filter: string) {
     setFiltersState(filter);

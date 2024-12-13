@@ -5,4 +5,5 @@ export type OfferType = {
   lastPrices: string[];
   currentPrice: string;
   status: string;
+  img: string;
 };

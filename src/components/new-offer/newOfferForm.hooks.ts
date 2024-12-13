@@ -2,7 +2,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -22,10 +22,12 @@ async function submitHandler(
 }
 
 export function useNewOfferForm() {
-  const { push } = useRouter();
+  const router = useRouter();
   const { toast } = useToast();
   const [isAddingMultiple, setIsAddingMultiple] = useState(false);
   const { data: userData } = useSession();
+  const queryCLient = useQueryClient();
+
   const { mutate: addOffer, isPending } = useMutation({
     mutationKey: ["newOffer"],
     mutationFn: async (data: z.infer<typeof newOfferSchema>) => {
@@ -37,8 +39,9 @@ export function useNewOfferForm() {
     onSuccess: () => {
       toast({ description: "Offer added." });
       form.reset();
+      queryCLient.invalidateQueries({ queryKey: "offers" });
       if (!isAddingMultiple) {
-        push("/");
+        router.push(`/`);
       }
     },
   });

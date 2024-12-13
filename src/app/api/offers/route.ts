@@ -36,20 +36,6 @@ export async function GET(req: Request) {
       });
     }
 
-    // const categorizedOffers = offers.reduce(
-    //   (acc, offer) => {
-    //     if (offer.status) {
-    //       acc[offer.status as keyof typeof acc].push(offer);
-    //     }
-    //     return acc;
-    //   },
-    //   {
-    //     new: [] as OfferType[],
-    //     changed: [] as OfferType[],
-    //     notChanged: [] as OfferType[],
-    //   }
-    // );
-
     const totalOffers = await Offer.countDocuments({ userId, status: filter });
     const hasNextPage = (cursor + 1) * limit < totalOffers;
     const nextCursor = hasNextPage ? cursor + 1 : null;
@@ -84,20 +70,21 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const websiteCurrentPrice = await fetchPrice({ url });
+    const websiteCurrentInfo = await fetchPrice({ url });
 
-    if (!websiteCurrentPrice) {
+    if (!websiteCurrentInfo) {
       return NextResponse.json({
         message: "Error fetching price",
         status: 400,
       });
     }
-
+    console.log("websiteCurrentInfo", websiteCurrentInfo);
     const offer = await Offer.create({
-      name: name || "No name",
+      name: name || websiteCurrentInfo.title || "No title",
       url,
       userId,
-      currentPrice: websiteCurrentPrice,
+      currentPrice: websiteCurrentInfo.price,
+      img: websiteCurrentInfo.img,
       status: "new",
     });
     console.log("offer", offer);

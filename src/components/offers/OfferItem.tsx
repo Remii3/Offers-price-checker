@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { OfferType } from "../../../types/types";
 import {
@@ -7,14 +9,28 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
+import Image from "next/image";
+import { useOfferItem } from "./useOfferItem";
+import { Loader2, Trash } from "lucide-react";
 
 export default function OfferItem({ offer }: { offer: OfferType }) {
-  console.log("offer.lastPrices", offer.lastPrices);
+  const { deleteOffer, isDeletingOffer } = useOfferItem();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{offer.name}</CardTitle>
+        <div className="h-[180px] relative w-full object-center bg-gray-200 rounded-md overflow-hidden">
+          {offer.img && (
+            <Image
+              src={offer.img}
+              alt={offer.name}
+              width={300}
+              height={500}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+        </div>
+        <CardTitle className="line-clamp-1">{offer.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm flex justify-between flex-wrap">
@@ -29,7 +45,7 @@ export default function OfferItem({ offer }: { offer: OfferType }) {
           </span>
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="gap-4">
         <Link
           href={`${offer.url}`}
           rel="noopener noreferrer"
@@ -38,6 +54,14 @@ export default function OfferItem({ offer }: { offer: OfferType }) {
         >
           Visit
         </Link>
+        <Button
+          onClick={() => deleteOffer({ offerId: offer._id })}
+          disabled={isDeletingOffer}
+          variant={"destructive"}
+        >
+          {isDeletingOffer && <Loader2 className="animate-spin" />}
+          {!isDeletingOffer && <Trash />}
+        </Button>
       </CardFooter>
     </Card>
   );

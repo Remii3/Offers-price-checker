@@ -13,9 +13,9 @@ import {
 import { Input } from "../ui/input";
 import { Button, buttonVariants } from "../ui/button";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
+import Link from "next/link";
 
 export default function NewOfferForm() {
   const {
@@ -25,6 +25,7 @@ export default function NewOfferForm() {
     handleIsAddingMultiple,
     isAddingMultiple,
   } = useNewOfferForm();
+
   return (
     <>
       <Form {...form}>
@@ -75,14 +76,16 @@ export default function NewOfferForm() {
             <div className="grid gap-1.5 leading-none">
               <Label htmlFor="terms1">Multiple offers</Label>
               <p className="text-sm text-muted-foreground">
-                Select if you're going to add multiple urls.
+                Select if you&apos;re going to add multiple urls.
               </p>
             </div>
           </div>
           <div className="pt-2 flex justify-end gap-4">
             <Link
-              href={`/`}
-              className={`${buttonVariants({ variant: "outline" })}`}
+              href="/"
+              className={`${buttonVariants({
+                variant: "outline",
+              })}`}
             >
               Back
             </Link>

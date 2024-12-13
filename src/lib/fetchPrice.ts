@@ -2,7 +2,6 @@ import axios, { isAxiosError } from "axios";
 import * as cheerio from "cheerio";
 
 export async function fetchPrice({ url }: { url: string }) {
-  console.log("Url", url);
   try {
     const { data } = await axios.get(url, {
       headers: {
@@ -16,14 +15,33 @@ export async function fetchPrice({ url }: { url: string }) {
     });
     const $ = cheerio.load(data);
 
-    if (url.includes("olx")) {
-      return $(`[data-testid="ad-price-container"] h3`).text().trim();
+    const parsers = {
+      olx: () => ({
+        price: $(`[data-testid="ad-price-container"] h3`).text().trim() || "",
+        img: $(`[data-testid="image-galery-container"] img`).attr("src") || "",
+        title: $(`[data-testid="ad_title"] h4`).text().trim() || "",
+      }),
+      otodom: () => ({
+        price: $('[data-cy="adPageHeaderPrice"]').text().trim() || "",
+        img: $('meta[property="og:image"]').attr("content") || "",
+        title: $('meta[property="og:title"]').attr("content") || "",
+      }),
+    };
+
+    // Determine the site and parse
+    for (const key in parsers) {
+      if (url.includes(key)) {
+        const result = parsers[key as keyof typeof parsers]();
+        console.log(`Parsed data for ${key}:`, result);
+        return result;
+      }
     }
 
-    if (url.includes("otodom")) {
-      return $('[data-cy="adPageHeaderPrice"]').text().trim();
-    }
-    return $(".css-90xrc0").text().trim();
+    return {
+      price: $(".css-90xrc0").text().trim() || "",
+      img: $('meta[property="og:image"]').attr("content") || "",
+      title: $('meta[property="og:title"]').attr("content") || "",
+    };
   } catch (err) {
     if (isAxiosError(err)) {
       console.log("err", err);

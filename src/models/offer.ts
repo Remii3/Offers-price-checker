@@ -8,6 +8,7 @@ const OfferSchema = new Schema(
     currentPrice: { type: String, required: false, default: "" },
     userId: { type: String, required: true },
     status: { type: String, required: false, default: "notChanged" },
+    img: { type: String, required: false, default: "" },
   },
   { timestamps: true }
 );
