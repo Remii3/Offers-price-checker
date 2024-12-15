@@ -5,7 +5,7 @@ import {
   SORT_STATES,
   useOffersList,
 } from "./useOffersList.hooks";
-import { PlusCircle, RefreshCw, Search } from "lucide-react";
+import { PlusCircle, RefreshCw, Search, Trash } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import OfferItem from "./OfferItem";
 import CustomSelect from "../features/CustomSelect";
@@ -58,44 +58,76 @@ export default function OffersList() {
     hasNextPage,
     fetchNextPage,
     isRefreshingPrices,
+    handleSearch,
+    search,
+    handleSearchChange,
+    deleteAll,
+    deleteAllIsPending,
   } = useOffersList();
+
   return (
     <>
-      <div className="flex items-center justify-between gap-2 border-b border-input pb-2">
-        <h2 className="text-2xl font-medium">Offers:</h2>
-        <div className="flex items-center gap-4">
-          <form onSubmit={() => {}}>
-            <Input />
-            <Button variant={"outline"}>
-              <span className="sm:inline hidden">Search</span>
-              <Search className="h-6 w-6" />
+      <div className="flex items-center justify-between gap-2 border-b border-input pb-4">
+        <div className="flex items-center justify-between gap-4 w-full">
+          <div>
+            <form
+              onSubmit={handleSearch}
+              className="flex gap-2 relative w-full"
+            >
+              <Input
+                className={`flex-grow w-full transition-all ease-in-out pr-12`}
+                placeholder="Offer name"
+                onChange={(e) => handleSearchChange(e.target.value)}
+                value={search}
+              />
+              <button
+                type="submit"
+                className="absolute top-1/2 right-3 -translate-y-1/2 py-1"
+              >
+                <Search className="h-6 w-6" />
+              </button>
+            </form>
+          </div>
+          <div className="flex gap-4 items-center">
+            <Button
+              onClick={() => refetchWithNewData()}
+              disabled={isRefreshingPrices}
+            >
+              <span className="sm:inline hidden">Refresh</span>
+              <RefreshCw
+                className={`${isRefreshingPrices && "animate-spin"} h-6 w-6`}
+              />
             </Button>
-          </form>
-          <Button
-            onClick={() => refetchWithNewData()}
-            disabled={isRefreshingPrices}
-          >
-            <span className="sm:inline hidden">Refresh</span>
-            <RefreshCw
-              className={`${isRefreshingPrices && "animate-spin"} h-6 w-6`}
-            />
-          </Button>
-          <Link
-            href={"/new-offer"}
-            className={`${buttonVariants({ variant: "outline" })} flex gap-2`}
-          >
-            <span className="sm:inline hidden">Add more</span>
-            <PlusCircle className="h-6 w-6" />
-          </Link>
+            <Link
+              href={"/new-offer"}
+              className={`${buttonVariants({ variant: "outline" })} flex gap-2`}
+            >
+              <span className="sm:inline hidden">Add more</span>
+              <PlusCircle className="h-6 w-6" />
+            </Link>
+          </div>
         </div>
       </div>
       <div className="mt-4 flex justify-between">
-        <div>
+        <div className="flex gap-4">
           <CustomSelect
             changeSelectHandler={changeFilterHandler}
             selectState={filtersState as keyof typeof offerPages}
             customStates={FILTER_STATES}
           />
+          {filtersState === "deleted" && (
+            <Button
+              variant={"destructive"}
+              disabled={
+                deleteAllIsPending ||
+                (offerPages && offerPages.pages[0].totalOffers <= 0)
+              }
+              onClick={() => deleteAll()}
+            >
+              <Trash />
+              <span>Delete all</span>
+            </Button>
+          )}
         </div>
         <div>
           <CustomSelect

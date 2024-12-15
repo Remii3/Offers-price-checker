@@ -1,13 +1,14 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { OfferType } from "../../../types/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 type ResponseType = {
   offers: OfferType[];
   nextCursor: number;
+  totalOffers: number;
 };
 
 export const FILTER_STATES = [
@@ -27,7 +28,7 @@ export function useOffersList() {
   const { data: session } = useSession();
 
   const [isRefreshingPrices, setIsRefreshingPrices] = useState(false);
-
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const router = useRouter();
   const initialFilter = searchParams.get("filter") || FILTER_STATES[0].value;
   const initialSort = searchParams.get("sort") || SORT_STATES[0].value;
@@ -49,14 +50,15 @@ export function useOffersList() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery<ResponseType, Error>({
-    queryKey: ["offers"],
+    queryKey: ["offers", sortState, filtersState],
     queryFn: async ({ pageParam }) => {
       const res = await axios.get<ResponseType>(`/api/offers`, {
         params: {
           cursor: pageParam,
-          userId: session ? session.user.id : "test",
+          userId: session && session.user.id,
           sort: sortState,
           filter: filtersState,
+          search,
         },
       });
       return res.data;
@@ -71,21 +73,62 @@ export function useOffersList() {
     refetchOnReconnect: false,
   });
 
-  useEffect(() => {
-    const params = new URLSearchParams({
-      filter: filtersState,
-      sort: sortState,
-    });
-    router.push(`/?${params.toString()}`, { scroll: false });
-    refetch();
-  }, [filtersState, sortState, router, refetch]);
+  const {
+    mutate: deleteAll,
+    isPending: deleteAllIsPending,
+    error: deleteAllError,
+  } = useMutation({
+    mutationKey: ["deleteAllOffers"],
+    mutationFn: async () => {
+      if (!session) return;
+      await axios.delete(`/api/offers/delete-offers`, {
+        params: { userId: session.user.id },
+      });
+    },
+  });
 
   function changeFilterHandler(filter: string) {
     setFiltersState(filter);
+    const searchUrlValue = new URLSearchParams(window.location.search);
+
+    if (filter) {
+      searchUrlValue.set("filter", filter);
+    } else {
+      searchUrlValue.delete("filter");
+    }
+
+    router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
   }
 
   function changeSortHandler(sort: string) {
     setSortState(sort);
+    const searchUrlValue = new URLSearchParams(window.location.search);
+
+    if (sort) {
+      searchUrlValue.set("sort", sort);
+    } else {
+      searchUrlValue.delete("sort");
+    }
+
+    router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
+  }
+
+  function handleSearchChange(data: string) {
+    setSearch(data);
+  }
+
+  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const searchUrlValue = new URLSearchParams(window.location.search);
+
+    if (search) {
+      searchUrlValue.set("search", search);
+    } else {
+      searchUrlValue.delete("search");
+    }
+
+    router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
+    refetch();
   }
 
   async function refetchWithNewData() {
@@ -109,5 +152,12 @@ export function useOffersList() {
     fetchNextPage,
     refetchWithNewData,
     isRefreshingPrices,
+    handleSearch,
+    search,
+    refetch,
+    handleSearchChange,
+    deleteAll,
+    deleteAllIsPending,
+    deleteAllError,
   };
 }

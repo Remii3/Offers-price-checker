@@ -30,7 +30,9 @@ export default function OfferItem({ offer }: { offer: OfferType }) {
             />
           )}
         </div>
-        <CardTitle className="line-clamp-1">{offer.name}</CardTitle>
+        <CardTitle className="line-clamp-1">
+          <Link href={`/offers/${offer._id}`}>{offer.name}</Link>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm flex justify-between flex-wrap">

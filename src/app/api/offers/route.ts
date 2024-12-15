@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const sort = url.searchParams.get("sort");
     const filter = url.searchParams.get("filter");
     const limit = 15;
-
+    console.log("urk", url);
     if (!userId || !sort || !filter) {
       return NextResponse.json(
         { message: "Missing required fields" },
@@ -23,7 +23,11 @@ export async function GET(req: Request) {
       );
     }
 
-    const offers: OfferType[] = await Offer.find({ userId, status: filter })
+    const offers: OfferType[] = await Offer.find({
+      userId,
+      status: filter,
+      name: { $regex: url.searchParams.get("search") || "", $options: "i" },
+    })
       .sort({ createdAt: sort === "newest" ? -1 : 1 })
       .skip(cursor * limit)
       .limit(limit);
@@ -33,6 +37,7 @@ export async function GET(req: Request) {
         message: "No offers found",
         offers: { new: [], changed: [], notChanged: [] },
         nextCursor: null,
+        totalOffers: 0,
       });
     }
 
@@ -43,6 +48,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       message: "GET check-offer",
       offers,
+      totalOffers,
       nextCursor,
     });
   } catch (err) {
