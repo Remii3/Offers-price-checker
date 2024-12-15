@@ -22,7 +22,9 @@ import { useRouter } from "next/navigation";
 // } satisfies ChartConfig;
 
 export default function OfferContent({ offerId }: { offerId: string }) {
-  const { offer, isPending } = useOfferContent({ offerId });
+  const { offer, isPending, refreshOffer, isRefreshing } = useOfferContent({
+    offerId,
+  });
   const router = useRouter();
   console.log("Offer:", offer);
   return (
@@ -71,6 +73,15 @@ export default function OfferContent({ offerId }: { offerId: string }) {
                     <li key={price + "price" + i}>{price}</li>
                   ))}
                 </ul>
+              </div>
+              <div>
+                <Button
+                  onClick={() => refreshOffer()}
+                  size={"sm"}
+                  disabled={isRefreshing}
+                >
+                  Refresh
+                </Button>
               </div>
             </div>
           </div>

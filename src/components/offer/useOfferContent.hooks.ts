@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { OfferType } from "../../../types/types";
@@ -8,6 +8,7 @@ type OfferResponse = {
 };
 
 export default function useOfferContent({ offerId }: { offerId: string }) {
+  const queryClient = useQueryClient();
   const { data } = useSession();
   const {
     data: offer,
@@ -33,8 +34,14 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
   } = useMutation({
     mutationKey: ["offerRefresh"],
     mutationFn: async () => {
-      const data = await axios.post(`/api/offers/${offerId}/refresh`);
-      return data.data;
+      const res = await axios.post(`/api/offers/${offerId}/refresh`, {
+        userId: data!.user.id,
+        offerId,
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["offer", offerId] });
     },
   });
 
