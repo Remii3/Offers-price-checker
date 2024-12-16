@@ -21,7 +21,6 @@ export default function Home() {
     hasNextPage,
     fetchNextPage,
     refreshOffersIsLoading,
-    handleSearch,
     search,
     handleSearchChange,
     handleDeleteAllOffers,
@@ -35,23 +34,17 @@ export default function Home() {
         <div className="flex items-center justify-between gap-2 border-b border-input pb-4">
           <div className="flex items-center justify-between gap-4 w-full">
             <div>
-              <form
-                onSubmit={handleSearch}
-                className="flex gap-2 relative w-full"
-              >
+              <div className="flex gap-2 relative w-full">
                 <Input
                   className={`flex-grow w-full transition-all ease-in-out pr-12`}
                   placeholder="Offer name"
                   onChange={(e) => handleSearchChange(e.target.value)}
                   value={search}
                 />
-                <button
-                  type="submit"
-                  className="absolute top-1/2 right-3 -translate-y-1/2 py-1"
-                >
-                  <Search className="h-6 w-6" />
-                </button>
-              </form>
+                <div className="absolute top-1/2 right-3 -translate-y-1/2 py-1">
+                  <Search className="h-5 w-5" />
+                </div>
+              </div>
             </div>
             <div className="flex gap-4 items-center">
               <Button

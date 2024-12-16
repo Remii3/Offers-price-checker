@@ -1,5 +1,5 @@
 "use client";
-
+import debounce from "lodash.debounce";
 import {
   useInfiniteQuery,
   useMutation,
@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import { OfferType } from "../../types/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FILTER_STATES, SORT_STATES } from "@/constants/constants";
@@ -134,14 +134,18 @@ export function useHome() {
     localStorage.setItem("sort", sort);
   }
 
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((search) => {
+        changeUrlParams("search", search);
+        queryClient.invalidateQueries({ queryKey: ["offers"] });
+      }, 700),
+    []
+  );
+
   function handleSearchChange(search: string) {
     setSearchState(search);
-  }
-
-  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    changeUrlParams("search", searchState);
-    refetch();
+    debouncedSearch(search);
   }
 
   function handleRefreshOffers() {
@@ -208,7 +212,6 @@ export function useHome() {
     changeSortHandler,
     hasNextPage,
     fetchNextPage,
-    handleSearch,
     handleSearchChange,
     search: searchState,
     handleRefreshOffers,
