@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -18,12 +20,14 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
   } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: async () => {
+      console.log("userId", data?.user.id, "offerId", offerId);
       const res = await axios.get<OfferResponse>(`/api/offers/${offerId}`, {
         params: {
           offerId,
           userId: data?.user.id,
         },
       });
+      console.log("Offer return", res.data);
       return res.data.offerData;
     },
   });
