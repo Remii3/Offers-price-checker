@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { OfferType } from "../../../types/types";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type OfferResponse = {
   offerData: OfferType;
@@ -11,8 +13,9 @@ type OfferResponse = {
 
 export default function useOfferContent({ offerId }: { offerId: string }) {
   const queryClient = useQueryClient();
-
-  const { data } = useSession();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { data: session } = useSession();
   const {
     data: offer,
     isPending,
@@ -22,12 +25,12 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     queryFn: async () => {
       const res = await axios.get<OfferResponse>(`/api/offers/${offerId}`, {
         params: {
-          userId: data?.user.id,
+          userId: session?.user.id,
         },
       });
       return res.data.offerData;
     },
-    enabled: !!offerId && !!data?.user.id,
+    enabled: !!offerId && !!session?.user.id,
   });
 
   const {
@@ -38,13 +41,18 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     mutationKey: ["offerRefresh"],
     mutationFn: async () => {
       const res = await axios.post(`/api/offers/${offerId}/refresh`, {
-        userId: data!.user.id,
+        userId: session!.user.id,
         offerId,
       });
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["offer", offerId] });
+      toast({ title: "Success", description: "Offer refreshed" });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast({ title: "Error", description: "Failed to refresh offer" });
     },
   });
 
@@ -55,10 +63,21 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
   } = useMutation({
     mutationKey: ["offerDelete"],
     mutationFn: async () => {
-      const data = await axios.delete(`/api/offers/${offerId}`);
-      return data.data;
+      const res = await axios.delete(`/api/offers/${offerId}`, {
+        data: { userId: session!.user.id },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      router.replace("/");
+      toast({ title: "Success", description: "Offer deleted" });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast({ title: "Error", description: "Failed to delete offer." });
     },
   });
+
   return {
     offer,
     isPending,

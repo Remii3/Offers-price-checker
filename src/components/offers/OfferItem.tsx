@@ -15,7 +15,7 @@ import { useOfferItem } from "./useOfferItem";
 import { Loader2, Trash } from "lucide-react";
 
 export default function OfferItem({ offer }: { offer: OfferType }) {
-  const { deleteOffer, isDeletingOffer } = useOfferItem();
+  const { handleDeleteOffer, isDeletingOffer } = useOfferItem();
   return (
     <Card>
       <CardHeader>
@@ -42,7 +42,6 @@ export default function OfferItem({ offer }: { offer: OfferType }) {
         <p className="text-sm flex justify-between flex-wrap">
           <span>Previous:</span>
           <span>
-            {" "}
             {offer.lastPrices.length > 0 ? offer.lastPrices.at(-1) : "New"}
           </span>
         </p>
@@ -57,7 +56,7 @@ export default function OfferItem({ offer }: { offer: OfferType }) {
           Visit
         </Link>
         <Button
-          onClick={() => deleteOffer({ offerId: offer._id })}
+          onClick={() => handleDeleteOffer(offer._id)}
           disabled={isDeletingOffer}
           variant={"destructive"}
         >
