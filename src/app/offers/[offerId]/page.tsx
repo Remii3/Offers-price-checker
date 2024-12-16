@@ -1,4 +1,3 @@
-"use client";
 import OfferContent from "@/components/offer/OfferContent";
 import { use } from "react";
 
@@ -10,6 +9,7 @@ export default function OfferPage({
   const paramRdy = use(params);
   return (
     <>
+      <h1>Test</h1>
       <OfferContent offerId={paramRdy.offerId} />
     </>
   );
