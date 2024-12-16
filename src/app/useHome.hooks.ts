@@ -1,3 +1,5 @@
+"use client";
+
 import {
   useInfiniteQuery,
   useMutation,
@@ -25,8 +27,8 @@ export function useHome() {
 
   const router = useRouter();
 
-  const filtersState = searchParams.get("filter") || FILTER_STATES[0].value;
-  const sortState = searchParams.get("sort") || SORT_STATES[0].value;
+  const [filtersState, setFiltersState] = useState(FILTER_STATES[0].value);
+  const [sortState, setSortState] = useState(SORT_STATES[0].value);
 
   const [searchState, setSearchState] = useState(
     searchParams.get("search") || ""
@@ -118,10 +120,12 @@ export function useHome() {
 
   function changeFilterHandler(filter: string) {
     changeUrlParams("filter", filter);
+    localStorage.setItem("filter", filter);
   }
 
   function changeSortHandler(sort: string) {
     changeUrlParams("sort", sort);
+    localStorage.setItem("sort", sort);
   }
 
   function handleSearchChange(search: string) {
@@ -148,12 +152,33 @@ export function useHome() {
 
   useEffect(() => {
     if (!searchParams.get("sort")) {
-      changeUrlParams("sort", SORT_STATES[0].value);
+      changeUrlParams(
+        "sort",
+        localStorage.getItem("sort") || SORT_STATES[0].value
+      );
     }
     if (!searchParams.get("filter")) {
-      changeUrlParams("filter", FILTER_STATES[0].value);
+      changeUrlParams(
+        "filter",
+        localStorage.getItem("filter") || FILTER_STATES[0].value
+      );
     }
   }, [changeUrlParams, searchParams]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setFiltersState(
+        searchParams.get("filter") ||
+          localStorage.getItem("filter") ||
+          FILTER_STATES[0].value
+      );
+      setSortState(
+        searchParams.get("sort") ||
+          localStorage.getItem("sort") ||
+          SORT_STATES[0].value
+      );
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (offerPagesError) {

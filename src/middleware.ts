@@ -6,15 +6,14 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  // Allow requests to public routes (e.g., /auth/signin) or if a token exists
   if (pathname.startsWith("/auth")) {
     return NextResponse.next();
   }
 
-  // Redirect to sign-in page if no token exists
   if (!token) {
     const url = req.nextUrl.clone();
     url.pathname = "/auth/signin";
+    url.search = "";
     return NextResponse.redirect(url);
   } else {
     return NextResponse.next();
