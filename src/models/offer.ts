@@ -3,7 +3,7 @@ import { Schema, model, models } from "mongoose";
 const OfferSchema = new Schema(
   {
     name: { type: String, required: true },
-    url: { type: String, required: true, unique: true },
+    url: { type: String, required: true },
     lastPrices: { type: [String], required: false, default: [] },
     currentPrice: { type: String, required: false, default: "" },
     userId: { type: String, required: true },

@@ -23,16 +23,14 @@ export async function fetchPrice({ url }: { url: string }) {
       }),
       otodom: () => ({
         price: $('[data-cy="adPageHeaderPrice"]').text().trim() || "",
-        img: $('meta[property="og:image"]').attr("content") || "",
-        title: $('meta[property="og:title"]').attr("content") || "",
+        img: $("div.image-gallery-slides img").attr("src") || "",
+        title: $('[data-cy="adPageAdTitle"]').text().trim() || "",
       }),
     };
 
-    // Determine the site and parse
     for (const key in parsers) {
       if (url.includes(key)) {
         const result = parsers[key as keyof typeof parsers]();
-        console.log(`Parsed data for ${key}:`, result);
         return result;
       }
     }
@@ -44,7 +42,6 @@ export async function fetchPrice({ url }: { url: string }) {
     };
   } catch (err) {
     if (isAxiosError(err)) {
-      console.log("err", err);
       if (err.status === 403) {
         console.error("They changed security measures, please update the code");
       }

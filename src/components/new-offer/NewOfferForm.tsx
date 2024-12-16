@@ -11,20 +11,11 @@ import {
   FormDescription,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Button, buttonVariants } from "../ui/button";
-import { Loader2 } from "lucide-react";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
-import Link from "next/link";
+import { Button } from "../ui/button";
+import { Loader2, Plus } from "lucide-react";
 
 export default function NewOfferForm() {
-  const {
-    form,
-    addOffer,
-    isPending,
-    handleIsAddingMultiple,
-    isAddingMultiple,
-  } = useNewOfferForm();
+  const { form, addOffer, isPending, handleCheckNew } = useNewOfferForm();
 
   return (
     <>
@@ -67,37 +58,23 @@ export default function NewOfferForm() {
               </FormItem>
             )}
           />
-          <div className="flex space-x-2">
-            <Checkbox
-              id="terms1"
-              checked={isAddingMultiple}
-              onCheckedChange={handleIsAddingMultiple}
-            />
-            <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="terms1">Multiple offers</Label>
-              <p className="text-sm text-muted-foreground">
-                Select if you&apos;re going to add multiple urls.
-              </p>
-            </div>
-          </div>
           <div className="pt-2 flex justify-end gap-4">
-            <Link
-              href="/"
-              className={`${buttonVariants({
-                variant: "outline",
-              })}`}
-            >
-              Back
-            </Link>
+            <Button type="button" onClick={handleCheckNew} variant={"outline"}>
+              Check new
+            </Button>
             <div className="flex gap-4">
               <Button type="submit" disabled={isPending}>
                 <Loader2
                   className={`${
                     isPending ? "block" : "hidden"
-                  } animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`}
+                  } animate-spin absolute`}
                 />
-                <span className={`${isPending ? "invisible" : "visible"}`}>
-                  Follow
+                <span
+                  className={`${
+                    isPending ? "invisible" : "visible"
+                  } flex gap-1 items-center`}
+                >
+                  Follow <Plus />
                 </span>
               </Button>
             </div>

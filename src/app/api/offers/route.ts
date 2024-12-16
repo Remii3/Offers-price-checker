@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const sort = url.searchParams.get("sort");
     const filter = url.searchParams.get("filter");
     const limit = 15;
-    console.log("urk", url);
+
     if (!userId || !sort || !filter) {
       return NextResponse.json(
         { message: "Missing required fields" },
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
         status: 400,
       });
     }
-    console.log("websiteCurrentInfo", websiteCurrentInfo);
+
     const offer = await Offer.create({
       name: name || websiteCurrentInfo.title || "No title",
       url,
@@ -93,16 +93,16 @@ export async function POST(req: NextRequest) {
       img: websiteCurrentInfo.img,
       status: "new",
     });
-    console.log("offer", offer);
+
     return NextResponse.json({
       message: "Successfully added offer",
       offer,
     });
   } catch (err) {
     if (isAxiosError(err)) {
-      console.log("Error adding offer: ", err.message);
+      console.error("Error adding offer: ", err.message);
     } else {
-      console.log("Error adding offer: ", err);
+      console.error("Error adding offer: ", err);
     }
     return NextResponse.json({ message: "Error adding offer" });
   }

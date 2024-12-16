@@ -5,6 +5,7 @@ import ContextProviderWrapper from "@/context/ContextProviderWrapper";
 import HeaderContent from "@/components/layout/headerContent";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
 
 const rubik = localFont({
   src: "./fonts/Rubik-VariableFont_wght.ttf",
@@ -49,6 +50,7 @@ export default function RootLayout({
             </span>
           </footer>
         </ContextProviderWrapper>
+        <Toaster />
       </body>
     </html>
   );

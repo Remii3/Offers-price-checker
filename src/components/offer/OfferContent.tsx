@@ -26,7 +26,6 @@ export default function OfferContent({ offerId }: { offerId: string }) {
     offerId,
   });
   const router = useRouter();
-  console.log("Offer:", offer);
   return (
     <div className="flex flex-col pt-8 h-full max-w-screen-lg mx-auto relative">
       {isPending && (

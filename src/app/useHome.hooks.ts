@@ -61,7 +61,7 @@ export function useHome() {
       return lastPage.nextCursor || undefined;
     },
     enabled: !!session?.user.id,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

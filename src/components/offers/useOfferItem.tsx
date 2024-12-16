@@ -16,8 +16,7 @@ export function useOfferItem() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: "offers" });
-      queryClient.refetchQueries({ queryKey: ["offers"] });
+      queryClient.invalidateQueries({ queryKey: ["offers"] });
     },
   });
 

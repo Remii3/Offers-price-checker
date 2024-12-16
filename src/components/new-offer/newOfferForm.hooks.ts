@@ -5,8 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -22,27 +21,25 @@ async function submitHandler(
 }
 
 export function useNewOfferForm() {
-  const router = useRouter();
   const { toast } = useToast();
-  const [isAddingMultiple, setIsAddingMultiple] = useState(false);
+  const router = useRouter();
   const { data: userData } = useSession();
-  const queryCLient = useQueryClient();
+  const searchParams = useSearchParams();
 
   const { mutate: addOffer, isPending } = useMutation({
     mutationKey: ["newOffer"],
-    mutationFn: async (data: z.infer<typeof newOfferSchema>) => {
-      if (!userData) {
-        return;
-      }
-      submitHandler({ ...data, userId: userData.user.id! });
+    mutationFn: async ({
+      data,
+      userId,
+    }: {
+      userId: string;
+      data: z.infer<typeof newOfferSchema>;
+    }) => {
+      submitHandler({ ...data, userId });
     },
-    onSuccess: () => {
-      toast({ description: "Offer added." });
+    onSuccess: async () => {
       form.reset();
-      queryCLient.invalidateQueries({ queryKey: "offers" });
-      if (!isAddingMultiple) {
-        router.push(`/`);
-      }
+      toast({ title: "Success", description: "Offer added." });
     },
   });
 
@@ -54,15 +51,25 @@ export function useNewOfferForm() {
     },
   });
 
-  function handleIsAddingMultiple() {
-    setIsAddingMultiple((prev) => !prev);
+  function handleAddOffer(data: z.infer<typeof newOfferSchema>) {
+    if (userData?.user.id) {
+      addOffer({ data, userId: userData.user.id });
+    }
+  }
+
+  function handleCheckNew() {
+    const url = new URLSearchParams(searchParams.toString());
+
+    url.set("filter", "new");
+    url.set("sort", localStorage.getItem("sort") || "oldest");
+    router.push(`/?${url.toString()}`, { scroll: false });
   }
 
   return {
     form,
-    addOffer,
+    addOffer: handleAddOffer,
     isPending,
-    handleIsAddingMultiple,
-    isAddingMultiple,
+    router,
+    handleCheckNew,
   };
 }
