@@ -30,6 +30,7 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
       console.log("Offer return", res.data);
       return res.data.offerData;
     },
+    enabled: !!offerId && !!data?.user.id,
   });
 
   const {
