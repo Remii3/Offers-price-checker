@@ -10,7 +10,7 @@ async function getOfferData(req: Request) {
     const url = new URL(req.url);
 
     const userId = url.searchParams.get("userId");
-    const offerId = url.searchParams.get("offerId");
+    const offerId = url.pathname.split("/").pop();
 
     if (!userId || !offerId) {
       return NextResponse.json({

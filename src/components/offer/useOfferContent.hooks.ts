@@ -23,7 +23,6 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
       console.log("userId", data?.user.id, "offerId", offerId);
       const res = await axios.get<OfferResponse>(`/api/offers/${offerId}`, {
         params: {
-          offerId,
           userId: data?.user.id,
         },
       });
