@@ -5,11 +5,13 @@ export async function sendNewPriceMail({
   currentPrice,
   lastPrice,
   name,
+  userEmail,
 }: {
   url: string;
   currentPrice: string;
   lastPrice: string;
   name: string;
+  userEmail: string;
 }) {
   const transport = createTransport({
     service: "gmail",
@@ -22,7 +24,7 @@ export async function sendNewPriceMail({
   try {
     await transport.sendMail({
       from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_END_USER,
+      to: userEmail,
       subject: `Price change notification for ${name}`,
       html: `
       <p><strong>Cena zmieniła się!</strong></p>

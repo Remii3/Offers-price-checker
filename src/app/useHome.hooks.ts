@@ -88,8 +88,14 @@ export function useHome() {
   const { mutate: refreshOffers, isPending: refreshOffersIsLoading } =
     useMutation({
       mutationKey: ["refreshOffers"],
-      mutationFn: async (userId: string) => {
-        return await axios.post(`/api/check-offers`, { userId });
+      mutationFn: async ({
+        userEmail,
+        userId,
+      }: {
+        userId: string;
+        userEmail: string;
+      }) => {
+        return await axios.post(`/api/check-offers`, { userId, userEmail });
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["offers"] });
@@ -139,8 +145,8 @@ export function useHome() {
   }
 
   function handleRefreshOffers() {
-    if (session?.user.id) {
-      refreshOffers(session.user.id);
+    if (session?.user.id && session?.user.email) {
+      refreshOffers({ userId: session.user.id, userEmail: session.user.email });
     }
   }
 

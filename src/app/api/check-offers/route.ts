@@ -10,8 +10,8 @@ export async function POST(req: Request) {
   try {
     await connectToDatabase();
 
-    const { userId } = await req.json();
-    if (!userId) {
+    const { userId, userEmail } = await req.json();
+    if (!userId || !userEmail) {
       return NextResponse.json(
         { message: "User ID is required" },
         { status: 400 }
@@ -74,6 +74,7 @@ export async function POST(req: Request) {
           ...offer,
           lastPrice: offer.currentPrice,
           currentPrice: websiteCurrentInfo.price || "deleted",
+          userEmail,
         });
       } else if (
         offer.lastPrices.at(-1) !== offer.currentPrice &&
