@@ -70,7 +70,7 @@ export function useHome() {
     mutationKey: ["deleteAllOffers"],
     mutationFn: async (userId: string) => {
       return await axios.delete(`/api/offers/delete-offers`, {
-        params: { userId },
+        data: { userId },
       });
     },
     onSuccess: () => {

@@ -83,7 +83,7 @@ export default function Home() {
               filtersState={filtersState}
               changeFilterHandler={changeFilterHandler}
             />
-            {filtersState === "deleted" && (
+            {!offerPagesIsLoading && filtersState === "deleted" && (
               <Button
                 variant={"destructive"}
                 disabled={

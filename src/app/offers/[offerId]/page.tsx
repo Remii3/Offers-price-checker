@@ -1,15 +1,16 @@
+"use client";
 import OfferContent from "@/components/offer/OfferContent";
+import { use } from "react";
 
-export default async function OfferPage({
+export default function OfferPage({
   params,
 }: {
   params: Promise<{ offerId: string }>;
 }) {
-  const rdyParams = await params;
-
+  const paramRdy = use(params);
   return (
     <>
-      <OfferContent offerId={rdyParams.offerId} />
+      <OfferContent offerId={paramRdy.offerId} />
     </>
   );
 }
