@@ -39,7 +39,6 @@ export function useHome() {
     isFetching,
     isLoading,
     error: offerPagesError,
-    refetch,
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery<ResponseType, Error>({
@@ -140,7 +139,7 @@ export function useHome() {
         changeUrlParams("search", search);
         queryClient.invalidateQueries({ queryKey: ["offers"] });
       }, 700),
-    []
+    [changeUrlParams, queryClient]
   );
 
   function handleSearchChange(search: string) {

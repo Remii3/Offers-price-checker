@@ -15,6 +15,9 @@ async function getOfferData(req: Request) {
     if (!userId || !offerId) {
       return NextResponse.json({
         message: "User ID and offer ID are required",
+        url,
+        userId,
+        offerId,
       });
     }
     const offerData = await Offer.findOne({ userId, _id: offerId });
