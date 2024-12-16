@@ -11,7 +11,7 @@ type OfferResponse = {
 
 export default function useOfferContent({ offerId }: { offerId: string }) {
   const queryClient = useQueryClient();
-  console.log("Hook id", offerId);
+
   const { data } = useSession();
   const {
     data: offer,
@@ -20,13 +20,11 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
   } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: async () => {
-      console.log("userId", data?.user.id, "offerId", offerId);
       const res = await axios.get<OfferResponse>(`/api/offers/${offerId}`, {
         params: {
           userId: data?.user.id,
         },
       });
-      console.log("Offer return", res.data);
       return res.data.offerData;
     },
     enabled: !!offerId && !!data?.user.id,
@@ -61,7 +59,6 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
       return data.data;
     },
   });
-  console.log("Hook", offer);
   return {
     offer,
     isPending,
