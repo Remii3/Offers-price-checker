@@ -4,10 +4,10 @@ import { Skeleton } from "../ui/skeleton";
 import OfferItem from "./OfferItem";
 import { Button } from "../ui/button";
 import { OfferType } from "../../../types/types";
+import { Loader2 } from "lucide-react";
+
 type OfferListProps = {
-  isFetching: boolean;
   isLoading: boolean;
-  isRefreshingPrices: boolean;
   offerPages?: {
     pages: {
       offers: OfferType[];
@@ -15,6 +15,7 @@ type OfferListProps = {
   };
   fetchNextPage: () => void;
   hasNextPage: boolean;
+  error: Error | null;
 };
 const ListLoader = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-4">
@@ -48,20 +49,17 @@ const ListError = ({
 }) => <div className="text-red-500 mt-4">{error.message}</div>;
 
 export default function OffersList({
-  isFetching,
   isLoading,
-  isRefreshingPrices,
   offerPages,
   fetchNextPage,
   hasNextPage,
+  error,
 }: OfferListProps) {
   return (
     <>
-      {/* {(isFetching || isLoading || isRefreshingPrices) && <ListLoader />}
-      {!isFetching && !isLoading && !isRefreshingPrices && error && (
-        <ListError error={error} />
-      )} */}
-      {!isFetching && !isLoading && !isRefreshingPrices && offerPages && (
+      {isLoading && <ListLoader />}
+      {!isLoading && error && <ListError error={error} />}
+      {!isLoading && offerPages && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-4">
             {offerPages.pages.map((page, pageIndex) => {
@@ -80,13 +78,21 @@ export default function OffersList({
             })}
           </div>
           {hasNextPage && (
-            <div className="mt-4 text-center">
+            <div className="mt-8 text-center">
               <Button
                 variant={"outline"}
                 onClick={() => fetchNextPage()}
-                disabled={isFetching}
+                disabled={isLoading}
+                className="relative"
               >
-                {isFetching ? "Loading..." : "Load More"}
+                <Loader2
+                  className={`${
+                    isLoading ? "opacity-100" : "opacity-0"
+                  } absolute h-6 w-6 animate-spin`}
+                />
+                <span className={`${isLoading ? "opacity-0" : "opacity-100"}`}>
+                  Show more
+                </span>
               </Button>
             </div>
           )}

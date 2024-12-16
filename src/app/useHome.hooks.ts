@@ -36,7 +36,7 @@ export function useHome() {
     data: offerPages,
     isFetching,
     isLoading,
-    error,
+    error: offerPagesError,
     refetch,
     hasNextPage,
     fetchNextPage,
@@ -155,11 +155,22 @@ export function useHome() {
     }
   }, [changeUrlParams, searchParams]);
 
+  useEffect(() => {
+    if (offerPagesError) {
+      toast({
+        title: "Failed to fetch offers",
+        description: offerPagesError.message || "Something went wrong.",
+        variant: "destructive",
+      });
+      console.error("Error fetching offers:", offerPagesError);
+    }
+  }, [offerPagesError, toast]);
+
   return {
     offerPages,
-    isLoading,
-    isFetching,
-    error,
+    offerPagesIsLoading:
+      isLoading || isFetching || refreshOffersIsLoading || deleteAllIsLoading,
+    offerPagesError,
     filtersState,
     changeFilterHandler,
     sortState,
@@ -167,9 +178,8 @@ export function useHome() {
     hasNextPage,
     fetchNextPage,
     handleSearch,
-    search: searchState,
-    refetch,
     handleSearchChange,
+    search: searchState,
     handleRefreshOffers,
     refreshOffersIsLoading,
     handleDeleteAllOffers,

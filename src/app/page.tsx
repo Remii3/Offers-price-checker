@@ -12,8 +12,7 @@ import SortSelector from "@/components/offers/SortSelector";
 export default function Home() {
   const {
     offerPages,
-    isFetching,
-    isLoading,
+    offerPagesIsLoading,
     changeFilterHandler,
     filtersState,
     changeSortHandler,
@@ -27,6 +26,7 @@ export default function Home() {
     handleSearchChange,
     handleDeleteAllOffers,
     deleteAllIsLoading,
+    offerPagesError,
   } = useHome();
 
   return (
@@ -107,10 +107,9 @@ export default function Home() {
         <OffersList
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          isRefreshingPrices={refreshOffersIsLoading}
+          isLoading={offerPagesIsLoading}
           offerPages={offerPages}
+          error={offerPagesError}
         />
       </section>
     </div>
