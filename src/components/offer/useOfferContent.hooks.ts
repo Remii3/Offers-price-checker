@@ -62,9 +62,9 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     error: deleteError,
   } = useMutation({
     mutationKey: ["offerDelete"],
-    mutationFn: async () => {
+    mutationFn: async ({ userId }: { userId: string }) => {
       const res = await axios.delete(`/api/offers/${offerId}`, {
-        data: { userId: session!.user.id },
+        data: { userId },
       });
       return res.data;
     },
@@ -78,6 +78,12 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     },
   });
 
+  function handleDeleteOffer() {
+    if (session?.user.id) {
+      deleteOffer({ userId: session.user.id });
+    }
+  }
+
   return {
     offer,
     isPending,
@@ -85,7 +91,7 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     refreshOffer,
     isRefreshing,
     refreshError,
-    deleteOffer,
+    handleDeleteOffer,
     isDeleting,
     deleteError,
   };

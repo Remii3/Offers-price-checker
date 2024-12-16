@@ -29,7 +29,7 @@ export default function OfferContent({ offerId }: { offerId: string }) {
     isPending,
     refreshOffer,
     isRefreshing,
-    deleteOffer,
+    handleDeleteOffer,
     isDeleting,
   } = useOfferContent({
     offerId,
@@ -103,7 +103,7 @@ export default function OfferContent({ offerId }: { offerId: string }) {
                   </span>
                 </Button>
                 <Button
-                  onClick={() => deleteOffer()}
+                  onClick={() => handleDeleteOffer()}
                   size={"sm"}
                   variant={"destructive"}
                   disabled={isDeleting}
