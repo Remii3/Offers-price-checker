@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 // } satisfies ChartConfig;
 
 export default function OfferContent({ offerId }: { offerId: string }) {
+  console.log("Inside:", offerId);
   const { offer, isPending, refreshOffer, isRefreshing } = useOfferContent({
     offerId,
   });
