@@ -33,24 +33,42 @@ async function fetchAllOffersHandler(req: Request) {
       .limit(limit);
 
     if (offers.length === 0) {
-      return NextResponse.json({
-        message: "No offers found",
-        offers: { new: [], changed: [], notChanged: [] },
-        nextCursor: null,
-        totalOffers: 0,
-      });
+      return NextResponse.json(
+        {
+          message: "No offers found",
+          offers: { new: [], changed: [], notChanged: [] },
+          nextCursor: null,
+          totalOffers: 0,
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control":
+              "no-store, no-cache, must-revalidate, proxy-revalidate",
+          },
+        }
+      );
     }
 
     const totalOffers = await Offer.countDocuments({ userId, status: filter });
     const hasNextPage = (cursor + 1) * limit < totalOffers;
     const nextCursor = hasNextPage ? cursor + 1 : null;
 
-    return NextResponse.json({
-      message: "GET check-offer",
-      offers,
-      totalOffers,
-      nextCursor,
-    });
+    return NextResponse.json(
+      {
+        message: "GET check-offer",
+        offers,
+        totalOffers,
+        nextCursor,
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
   } catch (err) {
     if (isAxiosError(err)) {
       console.error("Error in API:", err.message);
