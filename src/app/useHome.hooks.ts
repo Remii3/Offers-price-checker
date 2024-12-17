@@ -98,6 +98,7 @@ export function useHome() {
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["offers"] });
+        toast({ title: "Success", description: "Offers refreshed." });
       },
       onError: (error) => {
         toast({

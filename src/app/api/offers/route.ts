@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { OfferType } from "../../../../types/types";
 import { fetchPrice } from "@/lib/fetchPrice";
 
-export async function GET(req: Request) {
+async function fetchAllOffersHandler(req: Request) {
   try {
     await connectToDatabase();
 
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function createNewOfferHandler(req: NextRequest) {
   try {
     await connectToDatabase();
     const { name, url, userId } = await req.json();
@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (err.code === 11000) {
       console.error("Duplicate key error:", err.message);
@@ -118,3 +119,33 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+async function deleteAllHandler(req: Request) {
+  try {
+    await connectToDatabase();
+
+    const { userId } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json({
+        message: "User ID and offer ID are required",
+      });
+    }
+
+    await Offer.deleteMany({ userId, status: "deleted" });
+    return NextResponse.json({ message: "Successfully deleted offers" });
+  } catch (err) {
+    if (isAxiosError(err)) {
+      console.error(`Error deleting offers`, err.message);
+    } else {
+      console.error(`Error deleting offers:`, err);
+    }
+    return NextResponse.json({ message: "Error deleting offers." });
+  }
+}
+
+export {
+  deleteAllHandler as DELETE,
+  fetchAllOffersHandler as GET,
+  createNewOfferHandler as POST,
+};

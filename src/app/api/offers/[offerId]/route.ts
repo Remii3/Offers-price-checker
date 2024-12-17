@@ -36,7 +36,9 @@ async function deleteOffer(req: Request) {
   try {
     await connectToDatabase();
 
-    const { userId, offerId } = await req.json();
+    const { userId } = await req.json();
+
+    const offerId = req.url.split("/").pop();
 
     if (!userId || !offerId) {
       return NextResponse.json({

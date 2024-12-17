@@ -70,12 +70,12 @@ export async function POST(req: Request) {
         updates.img = websiteCurrentInfo.img;
         updates.$push = { lastPrices: offer.currentPrice };
 
-        sendNewPriceMail({
-          ...offer,
-          lastPrice: offer.currentPrice,
-          currentPrice: websiteCurrentInfo.price || "deleted",
-          userEmail,
-        });
+        // sendNewPriceMail({
+        //   ...offer,
+        //   lastPrice: offer.currentPrice,
+        //   currentPrice: websiteCurrentInfo.price || "deleted",
+        //   userEmail,
+        // });
       } else if (
         offer.lastPrices.at(-1) !== offer.currentPrice &&
         offer.status === "changed"
@@ -84,9 +84,12 @@ export async function POST(req: Request) {
         updates.$push = { lastPrices: offer.currentPrice };
       } else if (
         offer.currentPrice === websiteCurrentInfo.price &&
-        (offer.status === "changed" || offer.status === "new")
+        offer.status === "changed"
       ) {
         updates.status = "notChanged";
+      } else if (offer.status === "new") {
+        updates.status = "notChanged";
+        updates.$push = { lastPrices: offer.currentPrice };
       }
 
       if (Object.keys(updates).length > 0) {

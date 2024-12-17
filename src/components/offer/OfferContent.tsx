@@ -2,24 +2,35 @@
 
 import { ArrowLeft, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
-// import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
-// import { ChartConfig, ChartContainer } from "../ui/chart";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { ChartConfig, ChartContainer } from "../ui/chart";
 import useOfferContent from "./useOfferContent.hooks";
 import { useRouter } from "next/navigation";
-// const chartData = [
-//   { month: "January", desktop: 186, mobile: 80 },
-//   { month: "February", desktop: 305, mobile: 200 },
-//   { month: "March", desktop: 237, mobile: 120 },
-//   { month: "April", desktop: 73, mobile: 190 },
-//   { month: "May", desktop: 209, mobile: 130 },
-//   { month: "June", desktop: 214, mobile: 140 },
-// ];
-// const chartConfig = {
-//   desktop: {
-//     label: "Desktop",
-//     color: "#FF0000",
-//   },
-// } satisfies ChartConfig;
+import { useMemo } from "react";
+
+const chartConfig = {
+  desktop: {
+    label: "Prices",
+    color: "#171717",
+  },
+} satisfies ChartConfig;
+
+const normalizePrices = (data: string[] | undefined) => {
+  if (!data) return [];
+  return data.map((price, index) => {
+    const cleanedPrice = price.replace(/[^0-9.]/g, "").replace(/\s+/g, "");
+    const numericValue = parseFloat(cleanedPrice) || 0;
+
+    return { index: index + 1, price: numericValue };
+  });
+};
 
 export default function OfferContent({ offerId }: { offerId: string }) {
   const router = useRouter();
@@ -27,13 +38,18 @@ export default function OfferContent({ offerId }: { offerId: string }) {
   const {
     offer,
     isPending,
-    refreshOffer,
+    handleRefreshOffer,
     isRefreshing,
     handleDeleteOffer,
     isDeleting,
   } = useOfferContent({
     offerId,
   });
+
+  const chartData = useMemo(
+    () => normalizePrices(offer?.lastPrices),
+    [offer?.lastPrices]
+  );
 
   return (
     <div className="flex flex-col pt-8 h-full max-w-screen-lg mx-auto relative">
@@ -45,20 +61,6 @@ export default function OfferContent({ offerId }: { offerId: string }) {
       {!isPending && offer && (
         <>
           <div className="space-y-3">
-            {/* TODO add chart */}
-            {/* <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-            <LineChart data={chartData} accessibilityLayer>
-            <CartesianGrid stroke="#f5f5f5" />
-            <XAxis
-            dataKey={"month"}
-            tickLine={false}
-            tickMargin={10}
-            axisLine={false}
-            tickFormatter={(val) => val.slice(0, 3)}
-            />
-            <Line type="monotone" dataKey="desktop" stroke="#FF0000" />
-            </LineChart>
-            </ChartContainer> */}
             <div className="flex items-center justify-start gap-4">
               <Button
                 onClick={() => router.back()}
@@ -70,6 +72,43 @@ export default function OfferContent({ offerId }: { offerId: string }) {
               </Button>
               <h1 className="text-xl font-medium">{offer.name}</h1>
             </div>
+            <ChartContainer
+              config={chartConfig}
+              className="min-h-[200px] w-full relative"
+            >
+              {chartData.length > 0 ? (
+                <LineChart data={chartData} accessibilityLayer>
+                  <CartesianGrid stroke="#f5f5f5" />
+                  <XAxis
+                    dataKey={"index"}
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    dataKey={"price"}
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value) => [`${value}`, "Price"]}
+                    labelFormatter={(label) => `Point: ${label}`}
+                    cursor={{ stroke: "#171717", strokeDasharray: "3 3" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="price"
+                    stroke="#171717"
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              ) : (
+                <p className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+                  No prices available
+                </p>
+              )}
+            </ChartContainer>
             <div className="space-y-4">
               <p className="space-x-2">
                 <span>Current price:</span>
@@ -91,7 +130,7 @@ export default function OfferContent({ offerId }: { offerId: string }) {
               </div>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => refreshOffer()}
+                  onClick={() => handleRefreshOffer()}
                   size={"sm"}
                   disabled={isRefreshing}
                 >

@@ -39,15 +39,22 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     error: refreshError,
   } = useMutation({
     mutationKey: ["offerRefresh"],
-    mutationFn: async () => {
-      const res = await axios.post(`/api/offers/${offerId}/refresh`, {
-        userId: session!.user.id,
+    mutationFn: async ({
+      userId,
+      userEmail,
+    }: {
+      userId: string;
+      userEmail: string;
+    }) => {
+      const res = await axios.post(`/api/check-offers/${offerId}`, {
+        userId,
         offerId,
+        userEmail,
       });
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["offer", offerId] });
+      queryClient.invalidateQueries({ queryKey: ["offer"] });
       toast({ title: "Success", description: "Offer refreshed" });
     },
     onError: (err) => {
@@ -69,7 +76,7 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
       return res.data;
     },
     onSuccess: () => {
-      router.replace("/");
+      router.back();
       toast({ title: "Success", description: "Offer deleted" });
     },
     onError: (err) => {
@@ -84,11 +91,20 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     }
   }
 
+  function handleRefreshOffer() {
+    if (session?.user.id && session?.user.email) {
+      refreshOffer({
+        userId: session.user.id,
+        userEmail: session.user.email,
+      });
+    }
+  }
+
   return {
     offer,
     isPending,
     error,
-    refreshOffer,
+    handleRefreshOffer,
     isRefreshing,
     refreshError,
     handleDeleteOffer,
