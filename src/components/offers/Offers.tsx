@@ -20,8 +20,6 @@ export default function Offers() {
     changeSortHandler,
     sortState,
     handleRefreshOffers,
-    hasNextPage,
-    fetchNextPage,
     refreshOffersIsLoading,
     search,
     handleSearchChange,
@@ -80,10 +78,7 @@ export default function Offers() {
             {!offerPagesIsLoading && (
               <Button
                 variant={"destructive"}
-                disabled={
-                  deleteAllIsLoading ||
-                  (offerPages && offerPages.pages[0].totalOffers <= 0)
-                }
+                disabled={deleteAllIsLoading}
                 onClick={() => handleDeleteAllOffers()}
               >
                 <Trash />
@@ -100,8 +95,6 @@ export default function Offers() {
         </div>
         <div className="px-4">
           <OffersList
-            fetchNextPage={fetchNextPage}
-            hasNextPage={hasNextPage}
             isLoading={offerPagesIsLoading}
             offerPages={offerPages}
             error={offerPagesError}

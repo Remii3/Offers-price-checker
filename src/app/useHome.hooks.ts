@@ -3,6 +3,7 @@ import debounce from "lodash.debounce";
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import axios from "axios";
@@ -34,39 +35,60 @@ export function useHome() {
     searchParams.get("search") || ""
   );
 
+  // const {
+  //   data: offerPages,
+  //   isFetching,
+  //   isLoading,
+  //   error: offerPagesError,
+  //   hasNextPage,
+  //   fetchNextPage,
+  // } = useInfiniteQuery<ResponseType, Error>({
+  // queryKey: ["offers"],
+  // queryFn: async ({ pageParam }) => {
+  //   const res = await axios.get<ResponseType>(
+  //     `/api/offers?cache_bust=${new Date().getTime()}`,
+  //     {
+  //       params: {
+  //         cursor: pageParam,
+  //         userId: session?.user.id,
+  //         sort: sortState,
+  //         filter: filtersState,
+  //         search: searchState,
+  //       },
+  //     }
+  //   );
+  //   return res.data;
+  // },
+  // initialPageParam: 0,
+  // getNextPageParam: (lastPage) => {
+  //   return lastPage.nextCursor || undefined;
+  // },
+  // enabled: !!session?.user.id,
+  // refetchOnMount: true,
+  // refetchOnWindowFocus: false,
+  // refetchOnReconnect: false,
+  // staleTime: 0,
+  // });
+
   const {
     data: offerPages,
-    isFetching,
     isLoading,
+    isFetching,
     error: offerPagesError,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery<ResponseType, Error>({
+  } = useQuery({
     queryKey: ["offers"],
     queryFn: async ({ pageParam }) => {
-      const res = await axios.get<ResponseType>(
-        `/api/offers?cache_bust=${new Date().getTime()}`,
-        {
-          params: {
-            cursor: pageParam,
-            userId: session?.user.id,
-            sort: sortState,
-            filter: filtersState,
-            search: searchState,
-          },
-        }
-      );
+      const res = await axios.get<ResponseType>(`/api/offers`, {
+        params: {
+          cursor: pageParam,
+          userId: session?.user.id,
+          sort: sortState,
+          filter: filtersState,
+          search: searchState,
+        },
+      });
       return res.data;
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
-      return lastPage.nextCursor || undefined;
-    },
-    enabled: !!session?.user.id,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: 0,
   });
 
   const { mutate: deleteAll, isPending: deleteAllIsLoading } = useMutation({
@@ -224,8 +246,8 @@ export function useHome() {
     changeFilterHandler,
     sortState,
     changeSortHandler,
-    hasNextPage,
-    fetchNextPage,
+    // hasNextPage,
+    // fetchNextPage,
     handleSearchChange,
     search: searchState,
     handleRefreshOffers,

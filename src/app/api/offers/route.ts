@@ -12,11 +12,11 @@ async function fetchAllOffersHandler(req: Request) {
     await connectToDatabase();
 
     const url = new URL(req.url);
-    const cursor = Number(url.searchParams.get("cursor") || 0);
+    // const cursor = Number(url.searchParams.get("cursor") || 0);
     const userId = url.searchParams.get("userId");
     const sort = url.searchParams.get("sort");
     const filter = url.searchParams.get("filter");
-    const limit = 15;
+    // const limit = 15;
 
     if (!userId || !sort || !filter) {
       return NextResponse.json(
@@ -29,10 +29,9 @@ async function fetchAllOffersHandler(req: Request) {
       userId,
       status: filter,
       name: { $regex: url.searchParams.get("search") || "", $options: "i" },
-    })
-      .sort({ createdAt: sort === "newest" ? -1 : 1 })
-      .skip(cursor * limit)
-      .limit(limit);
+    }).sort({ createdAt: sort === "newest" ? -1 : 1 });
+    // .skip(cursor * limit)
+    // .limit(limit);
     console.log("MongoDB Query:", {
       userId,
       status: filter,
@@ -49,7 +48,6 @@ async function fetchAllOffersHandler(req: Request) {
           filter,
           sort,
           userId,
-          cursor,
           realOffers: offers,
         },
         {
@@ -63,15 +61,15 @@ async function fetchAllOffersHandler(req: Request) {
     }
 
     const totalOffers = await Offer.countDocuments({ userId, status: filter });
-    const hasNextPage = (cursor + 1) * limit < totalOffers;
-    const nextCursor = hasNextPage ? cursor + 1 : null;
+    // const hasNextPage = (cursor + 1) * limit < totalOffers;
+    // const nextCursor = hasNextPage ? cursor + 1 : null;
 
     return NextResponse.json(
       {
         message: "GET check-offer",
         offers,
         totalOffers,
-        nextCursor,
+        // nextCursor,
       },
       {
         status: 200,
