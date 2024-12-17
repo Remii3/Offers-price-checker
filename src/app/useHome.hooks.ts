@@ -153,7 +153,7 @@ export function useHome() {
   );
 
   const loadMoreOffers = () => {
-    setSkip((prev) => prev + 15);
+    setSkip((prev) => prev + 3);
   };
 
   function handleSearchChange(search: string) {

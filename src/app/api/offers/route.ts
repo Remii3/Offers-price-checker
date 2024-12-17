@@ -16,7 +16,9 @@ async function fetchAllOffersHandler(req: Request) {
     const userId = url.searchParams.get("userId");
     const sort = url.searchParams.get("sort");
     const filter = url.searchParams.get("filter");
-    const limit = 2;
+    const limit = 3;
+
+    console.log("skip", skip);
 
     if (!userId || !sort || !filter) {
       return NextResponse.json(
