@@ -1,3 +1,4 @@
+export const fetchCache = "force-no-store";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Offer } from "@/models/offer";
 import { isAxiosError } from "axios";

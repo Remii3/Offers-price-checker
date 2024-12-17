@@ -1,3 +1,5 @@
+export const fetchCache = "force-no-store";
+
 import { fetchPrice } from "@/lib/fetchPrice";
 import { sendNewPriceMail } from "@/lib/mails";
 import { connectToDatabase } from "@/lib/mongodb";
