@@ -42,7 +42,7 @@ export function useHome() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery<ResponseType, Error>({
-    queryKey: ["offers", sortState, filtersState],
+    queryKey: ["offers"],
     queryFn: async ({ pageParam }) => {
       const res = await axios.get<ResponseType>(`/api/offers`, {
         params: {
@@ -206,6 +206,10 @@ export function useHome() {
       console.error("Error fetching offers:", offerPagesError);
     }
   }, [offerPagesError, toast]);
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["offers"] });
+  }, [sortState, filtersState, queryClient]);
 
   return {
     offerPages,

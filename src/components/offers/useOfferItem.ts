@@ -21,27 +21,16 @@ export function useOfferItem() {
       });
       return offerId;
     },
-    onSuccess: (deletedOfferId) => {
-      const queries = queryClient.getQueriesData({ queryKey: ["offers"] });
-
-      queries.forEach(([queryKey, oldData]) => {
-        if (!oldData) return;
-
-        queryClient.setQueryData(queryKey, (oldData: any) => {
-          if (!oldData) return oldData;
-          console.log("pages", oldData.pages);
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page: any) => ({
-              ...page,
-              offers: page.offers.filter(
-                (offer: any) => offer._id !== deletedOfferId
-              ),
-            })),
-          };
-        });
+    onSuccess: async (offerId) => {
+      console.log("Offer deleted. Invalidating queries...");
+      console.log("offerId", offerId);
+      await queryClient.invalidateQueries({
+        queryKey: ["offers"],
+        exact: true,
       });
-      queryClient.invalidateQueries({ queryKey: ["offers"] });
+      console.log("Invalidation complete. Refetching...");
+      await queryClient.refetchQueries({ queryKey: ["offers"], exact: true });
+      console.log("Refetch triggered successfully.");
       toast({ title: "Success", description: "Offer deleted." });
     },
     onError: (err) => {
