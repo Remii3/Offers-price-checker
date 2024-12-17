@@ -41,7 +41,7 @@ export function useOfferItem() {
           };
         });
       });
-
+      queryClient.invalidateQueries({ queryKey: ["offers"] });
       toast({ title: "Success", description: "Offer deleted." });
     },
     onError: (err) => {
