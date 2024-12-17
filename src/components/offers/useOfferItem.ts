@@ -21,7 +21,12 @@ export function useOfferItem() {
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["offers"] });
+      queryClient.removeQueries({ queryKey: ["offers"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["offers"],
+        stale: false,
+        refetchType: "all",
+      });
       await queryClient.refetchQueries({ queryKey: ["offers"] });
       toast({ title: "Success", description: "Offer deleted." });
     },

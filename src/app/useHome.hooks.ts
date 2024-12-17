@@ -101,7 +101,12 @@ export function useHome() {
         return await axios.post(`/api/check-offers`, { userId, userEmail });
       },
       onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey: ["offers"] });
+        queryClient.removeQueries({ queryKey: ["offers"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["offers"],
+          stale: false,
+          refetchType: "all",
+        });
         await queryClient.refetchQueries({ queryKey: ["offers"] });
 
         toast({ title: "Success", description: "Offers refreshed." });
