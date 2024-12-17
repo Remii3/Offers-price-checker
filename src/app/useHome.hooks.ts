@@ -44,15 +44,18 @@ export function useHome() {
   } = useInfiniteQuery<ResponseType, Error>({
     queryKey: ["offers"],
     queryFn: async ({ pageParam }) => {
-      const res = await axios.get<ResponseType>(`/api/offers`, {
-        params: {
-          cursor: pageParam,
-          userId: session?.user.id,
-          sort: sortState,
-          filter: filtersState,
-          search: searchState,
-        },
-      });
+      const res = await axios.get<ResponseType>(
+        `/api/offers?cache_bust=${new Date().getTime()}`,
+        {
+          params: {
+            cursor: pageParam,
+            userId: session?.user.id,
+            sort: sortState,
+            filter: filtersState,
+            search: searchState,
+          },
+        }
+      );
       return res.data;
     },
     initialPageParam: 0,
