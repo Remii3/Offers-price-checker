@@ -63,6 +63,7 @@ export function useHome() {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    staleTime: 0,
   });
 
   const { mutate: deleteAll, isPending: deleteAllIsLoading } = useMutation({
