@@ -13,4 +13,6 @@ const OfferSchema = new Schema(
   { timestamps: true }
 );
 
+OfferSchema.index({ userId: 1, url: 1 }, { unique: true });
+
 export const Offer = models.Offer || model("Offer", OfferSchema);

@@ -2,8 +2,8 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+import axios, { isAxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -13,12 +13,6 @@ const newOfferSchema = z.object({
   name: z.string(),
   url: z.string().url().min(1),
 });
-
-async function submitHandler(
-  data: z.infer<typeof newOfferSchema> & { userId: string }
-) {
-  await axios.post("/api/offers", data);
-}
 
 export function useNewOfferForm() {
   const { toast } = useToast();
@@ -35,11 +29,32 @@ export function useNewOfferForm() {
       userId: string;
       data: z.infer<typeof newOfferSchema>;
     }) => {
-      submitHandler({ ...data, userId });
+      const res = await axios.post("/api/offers", { ...data, userId });
+      if (res.status >= 400) {
+        throw new Error(res.data.message || "Failed to add offer");
+      }
+      return res.data;
     },
     onSuccess: async () => {
       form.reset();
       toast({ title: "Success", description: "Offer added." });
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.error("Error adding offer: ", error.message);
+        toast({
+          title: "Error",
+          description: error.response?.data.message || "Failed to add offer",
+          variant: "destructive",
+        });
+      } else {
+        console.error("Error adding offer: ", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to add offer",
+          variant: "destructive",
+        });
+      }
     },
   });
 

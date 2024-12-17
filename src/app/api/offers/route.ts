@@ -79,10 +79,12 @@ export async function POST(req: NextRequest) {
     const websiteCurrentInfo = await fetchPrice({ url });
 
     if (!websiteCurrentInfo) {
-      return NextResponse.json({
-        message: "Error fetching price",
-        status: 400,
-      });
+      return NextResponse.json(
+        {
+          message: "Error fetching price",
+        },
+        { status: 404 }
+      );
     }
 
     const offer = await Offer.create({
@@ -94,16 +96,25 @@ export async function POST(req: NextRequest) {
       status: "new",
     });
 
-    return NextResponse.json({
-      message: "Successfully added offer",
-      offer,
-    });
-  } catch (err) {
-    if (isAxiosError(err)) {
-      console.error("Error adding offer: ", err.message);
-    } else {
-      console.error("Error adding offer: ", err);
+    return NextResponse.json(
+      {
+        message: "Successfully added offer",
+        offer,
+      },
+      { status: 201 }
+    );
+  } catch (err: any) {
+    if (err.code === 11000) {
+      console.error("Duplicate key error:", err.message);
+      return NextResponse.json(
+        { message: "Offer with this URL already exists" },
+        { status: 409 } // Conflict
+      );
     }
-    return NextResponse.json({ message: "Error adding offer" });
+
+    return NextResponse.json(
+      { message: "Error adding offer" },
+      { status: 500 }
+    );
   }
 }
