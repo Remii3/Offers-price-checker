@@ -68,12 +68,15 @@ export function useHome() {
   const { mutate: deleteAll, isPending: deleteAllIsLoading } = useMutation({
     mutationKey: ["deleteAllOffers"],
     mutationFn: async (userId: string) => {
-      return await axios.delete(`/api/offers/delete-offers`, {
-        data: { userId },
+      return await axios.delete(`/api/offers`, {
+        data: { userId, filtersState },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["offers"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["offers"] });
+      await queryClient.refetchQueries({ queryKey: ["offers"] });
+
+      toast({ title: "Success", description: "All offers deleted." });
     },
     onError: (error) => {
       toast({
@@ -96,8 +99,10 @@ export function useHome() {
       }) => {
         return await axios.post(`/api/check-offers`, { userId, userEmail });
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["offers"] });
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["offers"] });
+        await queryClient.refetchQueries({ queryKey: ["offers"] });
+
         toast({ title: "Success", description: "Offers refreshed." });
       },
       onError: (error) => {

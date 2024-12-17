@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${rubik.variable} antialiased grid grid-rows-[64px_1fr_64px] min-h-screen`}
       >
         <ContextProviderWrapper>
-          <header className="h-16 flex items-center px-4 shadow-sm w-full justify-between">
+          <header className="h-16 flex items-center px-4 border-b border-input w-full justify-between">
             <HeaderContent />
           </header>
           <main>

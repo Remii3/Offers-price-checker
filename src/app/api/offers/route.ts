@@ -69,14 +69,15 @@ async function createNewOfferHandler(req: NextRequest) {
   try {
     await connectToDatabase();
     const { name, url, userId } = await req.json();
+    const checkedUrl = url.trim();
 
-    if (!url || !userId) {
+    if (!checkedUrl || !userId) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
       );
     }
-    const websiteCurrentInfo = await fetchPrice({ url });
+    const websiteCurrentInfo = await fetchPrice({ url: checkedUrl });
 
     if (!websiteCurrentInfo) {
       return NextResponse.json(
@@ -89,7 +90,7 @@ async function createNewOfferHandler(req: NextRequest) {
 
     const offer = await Offer.create({
       name: name || websiteCurrentInfo.title || "No title",
-      url,
+      url: checkedUrl,
       userId,
       currentPrice: websiteCurrentInfo.price,
       img: websiteCurrentInfo.img,
@@ -124,23 +125,32 @@ async function deleteAllHandler(req: Request) {
   try {
     await connectToDatabase();
 
-    const { userId } = await req.json();
+    const { userId, filtersState } = await req.json();
 
-    if (!userId) {
-      return NextResponse.json({
-        message: "User ID and offer ID are required",
-      });
+    if (!userId || !filtersState) {
+      return NextResponse.json(
+        {
+          message: "Missing required fields",
+        },
+        { status: 400 }
+      );
     }
 
-    await Offer.deleteMany({ userId, status: "deleted" });
-    return NextResponse.json({ message: "Successfully deleted offers" });
+    await Offer.deleteMany({ userId, status: filtersState });
+    return NextResponse.json(
+      { message: "Successfully deleted offers" },
+      { status: 200 }
+    );
   } catch (err) {
     if (isAxiosError(err)) {
       console.error(`Error deleting offers`, err.message);
     } else {
       console.error(`Error deleting offers:`, err);
     }
-    return NextResponse.json({ message: "Error deleting offers." });
+    return NextResponse.json(
+      { message: "Error deleting offers." },
+      { status: 500 }
+    );
   }
 }
 

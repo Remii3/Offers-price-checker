@@ -29,9 +29,9 @@ export default function Home() {
   } = useHome();
 
   return (
-    <div className="h-full my-4">
-      <section className="max-w-screen-2xl mx-auto px-4">
-        <div className="flex items-center justify-between gap-2 border-b border-input pb-4">
+    <div className="h-full mb-4">
+      <section className="max-w-screen-2xl mx-auto">
+        <div className="sticky top-0 z-10 bg-white py-4 px-4 border-b border-b-input">
           <div className="flex items-center justify-between gap-4 w-full">
             <div>
               <div className="flex gap-2 relative w-full">
@@ -70,13 +70,13 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="mt-4 flex justify-between">
+        <div className="px-4 mt-4 flex justify-between">
           <div className="flex gap-4">
             <FilterSelector
               filtersState={filtersState}
               changeFilterHandler={changeFilterHandler}
             />
-            {!offerPagesIsLoading && filtersState === "deleted" && (
+            {!offerPagesIsLoading && (
               <Button
                 variant={"destructive"}
                 disabled={
@@ -97,13 +97,15 @@ export default function Home() {
             />
           </div>
         </div>
-        <OffersList
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          isLoading={offerPagesIsLoading}
-          offerPages={offerPages}
-          error={offerPagesError}
-        />
+        <div className="px-4">
+          <OffersList
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isLoading={offerPagesIsLoading}
+            offerPages={offerPages}
+            error={offerPagesError}
+          />
+        </div>
       </section>
     </div>
   );

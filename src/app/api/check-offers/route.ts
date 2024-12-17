@@ -21,9 +21,12 @@ export async function POST(req: Request) {
     const offers: OfferType[] = await Offer.find({ userId: userId });
 
     if (!offers.length) {
-      return NextResponse.json({
-        message: "No offers found",
-      });
+      return NextResponse.json(
+        {
+          message: "No offers found",
+        },
+        { status: 404 }
+      );
     }
 
     const fetchResults = await Promise.all(
@@ -106,9 +109,12 @@ export async function POST(req: Request) {
       await Offer.bulkWrite(bulkOperations.filter((op) => op !== null));
     }
 
-    return NextResponse.json({
-      message: "Prices updated successfully",
-    });
+    return NextResponse.json(
+      {
+        message: "Prices updated successfully",
+      },
+      { status: 200 }
+    );
   } catch (err) {
     if (isAxiosError(err)) {
       console.error("Error in API:", err.message);

@@ -20,8 +20,10 @@ export function useOfferItem() {
         data: { userId },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["offers"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["offers"] });
+      await queryClient.refetchQueries({ queryKey: ["offers"] });
+      toast({ title: "Success", description: "Offer deleted." });
     },
     onError: (err) => {
       console.error(err);

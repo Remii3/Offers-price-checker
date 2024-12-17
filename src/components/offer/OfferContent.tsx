@@ -14,6 +14,7 @@ import { ChartConfig, ChartContainer } from "../ui/chart";
 import useOfferContent from "./useOfferContent.hooks";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { formatNumberWithSpaces } from "@/lib/formatNumberWithSpaces";
 
 const chartConfig = {
   desktop: {
@@ -52,7 +53,7 @@ export default function OfferContent({ offerId }: { offerId: string }) {
   );
 
   return (
-    <div className="flex flex-col pt-8 h-full max-w-screen-lg mx-auto relative">
+    <div className="flex flex-col my-8 h-full max-w-screen-lg mx-auto relative sm:px-0 px-4">
       {isPending && (
         <div className="w-full h-full flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin" />
@@ -60,17 +61,51 @@ export default function OfferContent({ offerId }: { offerId: string }) {
       )}
       {!isPending && offer && (
         <>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-start gap-4">
               <Button
                 onClick={() => router.back()}
                 variant={"outline"}
                 size={"icon"}
-                className="rounded-full"
+                className="rounded-full min-w-[36px]"
               >
                 <ArrowLeft className="h-6 w-6" />
               </Button>
               <h1 className="text-xl font-medium">{offer.name}</h1>
+            </div>
+            <div className="flex gap-4 justify-end">
+              <Button
+                onClick={() => handleRefreshOffer()}
+                size={"sm"}
+                disabled={isRefreshing}
+              >
+                <span className={`flex gap-1 items-center`}>
+                  Refresh
+                  <RefreshCcw
+                    className={`${isRefreshing && "animate-spin"} h-6 w-6`}
+                  />
+                </span>
+              </Button>
+              <Button
+                onClick={() => handleDeleteOffer()}
+                size={"sm"}
+                variant={"destructive"}
+                disabled={isDeleting}
+              >
+                <Loader2
+                  className={`${
+                    isDeleting ? "opacity-100" : "opacity-0"
+                  } absolute h-6 w-6`}
+                />
+                <span
+                  className={`${
+                    isDeleting ? "opacity-0" : "opacity-100"
+                  } flex gap-1 items-center`}
+                >
+                  Delete
+                  <Trash2 className="h-6 w-6" />
+                </span>
+              </Button>
             </div>
             <ChartContainer
               config={chartConfig}
@@ -92,7 +127,10 @@ export default function OfferContent({ offerId }: { offerId: string }) {
                     axisLine={false}
                   />
                   <Tooltip
-                    formatter={(value) => [`${value}`, "Price"]}
+                    formatter={(value) => [
+                      `${formatNumberWithSpaces(Number(value))}`,
+                      "Price",
+                    ]}
                     labelFormatter={(label) => `Point: ${label}`}
                     cursor={{ stroke: "#171717", strokeDasharray: "3 3" }}
                   />
@@ -127,40 +165,6 @@ export default function OfferContent({ offerId }: { offerId: string }) {
                     No prices available
                   </p>
                 )}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => handleRefreshOffer()}
-                  size={"sm"}
-                  disabled={isRefreshing}
-                >
-                  <span className={`flex gap-1 items-center`}>
-                    Refresh
-                    <RefreshCcw
-                      className={`${isRefreshing && "animate-spin"} h-6 w-6`}
-                    />
-                  </span>
-                </Button>
-                <Button
-                  onClick={() => handleDeleteOffer()}
-                  size={"sm"}
-                  variant={"destructive"}
-                  disabled={isDeleting}
-                >
-                  <Loader2
-                    className={`${
-                      isDeleting ? "opacity-100" : "opacity-0"
-                    } absolute h-6 w-6`}
-                  />
-                  <span
-                    className={`${
-                      isDeleting ? "opacity-0" : "opacity-100"
-                    } flex gap-1 items-center`}
-                  >
-                    Delete
-                    <Trash2 className="h-6 w-6" />
-                  </span>
-                </Button>
               </div>
             </div>
           </div>
