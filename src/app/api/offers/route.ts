@@ -12,11 +12,11 @@ async function fetchAllOffersHandler(req: Request) {
     await connectToDatabase();
 
     const url = new URL(req.url);
-    // const cursor = Number(url.searchParams.get("cursor") || 0);
+    const skip = Number(url.searchParams.get("skip") || 0);
     const userId = url.searchParams.get("userId");
     const sort = url.searchParams.get("sort");
     const filter = url.searchParams.get("filter");
-    // const limit = 15;
+    const limit = 2;
 
     if (!userId || !sort || !filter) {
       return NextResponse.json(
@@ -29,26 +29,17 @@ async function fetchAllOffersHandler(req: Request) {
       userId,
       status: filter,
       name: { $regex: url.searchParams.get("search") || "", $options: "i" },
-    }).sort({ createdAt: sort === "newest" ? -1 : 1 });
-    // .skip(cursor * limit)
-    // .limit(limit);
-    console.log("MongoDB Query:", {
-      userId,
-      status: filter,
-      name: { $regex: url.searchParams.get("search") || "", $options: "i" },
-    });
+    })
+      .sort({ createdAt: sort === "newest" ? -1 : 1 })
+      .skip(skip)
+      .limit(limit);
+
     if (offers.length === 0) {
       return NextResponse.json(
         {
           message: "No offers found",
           offers: [],
-          nextCursor: null,
           totalOffers: 0,
-          search: url.searchParams.get("search"),
-          filter,
-          sort,
-          userId,
-          realOffers: offers,
         },
         {
           status: 200,
@@ -61,8 +52,6 @@ async function fetchAllOffersHandler(req: Request) {
     }
 
     const totalOffers = await Offer.countDocuments({ userId, status: filter });
-    // const hasNextPage = (cursor + 1) * limit < totalOffers;
-    // const nextCursor = hasNextPage ? cursor + 1 : null;
 
     return NextResponse.json(
       {

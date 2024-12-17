@@ -5,15 +5,20 @@ import OfferItem from "./OfferItem";
 import { Button } from "../ui/button";
 import { OfferType } from "../../../types/types";
 import { Loader2 } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
 
 type OfferListProps = {
   isLoading: boolean;
-  offerPages?: {
+  offersData?: {
     offers: OfferType[];
-    nextCursor: number;
     totalOffers: number;
   };
+  allOffers?: OfferType[];
+  totalAvailable: number;
+  totalFetched: number;
   error: Error | null;
+  handleSkipChange: () => void;
+  setAllOffers: Dispatch<SetStateAction<any[]>>;
 };
 const ListLoader = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-4">
@@ -48,50 +53,43 @@ const ListError = ({
 
 export default function OffersList({
   isLoading,
-  offerPages,
   error,
+  allOffers,
+  totalAvailable,
+  handleSkipChange,
+  setAllOffers,
+  totalFetched,
 }: OfferListProps) {
   return (
     <>
       {isLoading && <ListLoader />}
       {!isLoading && error && <ListError error={error} />}
-      {!isLoading && offerPages && (
+      {!isLoading && allOffers && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-4">
-            {offerPages.offers.map((offer, pageIndex) => {
-              // return page.offers.length > 0 ? (
-              //   page.offers.map((offer) => (
-              //   ))
-              // ) : (
-              //   <div
-              //     key={"notFound" + pageIndex}
-              //     className="text-center col-span-5 text-gray-500"
-              //   >
-              //     No offers found
-              //   </div>
-              // );
-              return <OfferItem key={offer._id} offer={offer} />;
+            {allOffers.map((offer) => {
+              return (
+                <OfferItem
+                  key={offer._id}
+                  offer={offer}
+                  setAllOffers={setAllOffers}
+                />
+              );
             })}
           </div>
-          {/* {hasNextPage && (
-            <div className="mt-8 text-center">
-              <Button
-                variant={"outline"}
-                onClick={() => fetchNextPage()}
-                disabled={isLoading}
-                className="relative"
-              >
-                <Loader2
-                  className={`${
-                    isLoading ? "opacity-100" : "opacity-0"
-                  } absolute h-6 w-6 animate-spin`}
-                />
-                <span className={`${isLoading ? "opacity-0" : "opacity-100"}`}>
-                  Show more
-                </span>
+          {totalFetched < totalAvailable && (
+            <div className="flex justify-center mt-4">
+              <Button onClick={handleSkipChange} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin w-5 h-5 mr-2" /> Loading...
+                  </>
+                ) : (
+                  "Show More"
+                )}
               </Button>
             </div>
-          )} */}
+          )}
         </>
       )}
     </>

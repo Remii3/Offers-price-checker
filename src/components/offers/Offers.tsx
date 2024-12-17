@@ -13,19 +13,23 @@ import SortSelector from "@/components/offers/SortSelector";
 
 export default function Offers() {
   const {
-    offerPages,
     offerPagesIsLoading,
-    changeFilterHandler,
     filtersState,
-    changeSortHandler,
     sortState,
     handleRefreshOffers,
     refreshOffersIsLoading,
     search,
     handleSearchChange,
     handleDeleteAllOffers,
-    deleteAllIsLoading,
+    deleteAllOffersIsLoading,
     offerPagesError,
+    allOffers,
+    totalAvailable,
+    totalFetched,
+    handleFilterChange,
+    handleSortChange,
+    loadMoreOffers,
+    setAllOffers,
   } = useHome();
   return (
     <div className="h-full mb-4">
@@ -73,12 +77,12 @@ export default function Offers() {
           <div className="flex gap-4">
             <FilterSelector
               filtersState={filtersState}
-              changeFilterHandler={changeFilterHandler}
+              changeFilterHandler={handleFilterChange}
             />
             {!offerPagesIsLoading && (
               <Button
                 variant={"destructive"}
-                disabled={deleteAllIsLoading}
+                disabled={deleteAllOffersIsLoading}
                 onClick={() => handleDeleteAllOffers()}
               >
                 <Trash />
@@ -88,7 +92,7 @@ export default function Offers() {
           </div>
           <div>
             <SortSelector
-              changeSortHandler={changeSortHandler}
+              changeSortHandler={handleSortChange}
               sortsState={sortState}
             />
           </div>
@@ -96,8 +100,12 @@ export default function Offers() {
         <div className="px-4">
           <OffersList
             isLoading={offerPagesIsLoading}
-            offerPages={offerPages}
             error={offerPagesError}
+            allOffers={allOffers}
+            totalAvailable={totalAvailable}
+            totalFetched={totalFetched}
+            handleSkipChange={loadMoreOffers}
+            setAllOffers={setAllOffers}
           />
         </div>
       </section>

@@ -11,11 +11,20 @@ import {
 } from "../ui/card";
 import { Button, buttonVariants } from "../ui/button";
 import Image from "next/image";
-import { useOfferItem } from "./useOfferItem";
 import { Loader2, Trash } from "lucide-react";
+import useOfferItem from "./useOfferItem.hooks";
+import { Dispatch, SetStateAction } from "react";
 
-export default function OfferItem({ offer }: { offer: OfferType }) {
-  const { handleDeleteOffer, isDeletingOffer } = useOfferItem();
+export default function OfferItem({
+  offer,
+  setAllOffers,
+}: {
+  offer: OfferType;
+  setAllOffers: Dispatch<SetStateAction<any[]>>;
+}) {
+  const { handleDeleteOffer, isDeletingOffer } = useOfferItem({
+    setAllOffers,
+  });
   return (
     <Card>
       <CardHeader>

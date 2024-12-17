@@ -2,11 +2,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { Dispatch, SetStateAction } from "react";
 
-export function useOfferItem() {
+export default function useOfferItem({
+  setAllOffers,
+}: {
+  setAllOffers: Dispatch<SetStateAction<any[]>>;
+}) {
   const queryClient = useQueryClient();
-  const { data } = useSession();
   const { toast } = useToast();
+  const { data: session } = useSession();
+
   const { mutate: deleteOffer, isPending: isDeletingOffer } = useMutation({
     mutationKey: ["deleteOffer"],
     mutationFn: async ({
@@ -21,16 +27,13 @@ export function useOfferItem() {
       });
       return offerId;
     },
-    onSuccess: async (offerId) => {
-      console.log("Offer deleted. Invalidating queries...");
-      console.log("offerId", offerId);
-      await queryClient.invalidateQueries({
+    onSuccess: (offerId: string) => {
+      queryClient.invalidateQueries({
         queryKey: ["offers"],
-        exact: true,
       });
-      console.log("Invalidation complete. Refetching...");
-      await queryClient.refetchQueries({ queryKey: ["offers"], exact: true });
-      console.log("Refetch triggered successfully.");
+      setAllOffers((prev) => {
+        return prev.filter((o) => o._id !== offerId);
+      });
       toast({ title: "Success", description: "Offer deleted." });
     },
     onError: (err) => {
@@ -38,15 +41,10 @@ export function useOfferItem() {
       toast({ title: "Error", description: "Failed to delete offer." });
     },
   });
-
   function handleDeleteOffer(offerId: string) {
-    if (data?.user.id) {
-      deleteOffer({ offerId, userId: data?.user.id });
+    if (session?.user.id) {
+      deleteOffer({ offerId, userId: session?.user.id });
     }
   }
-
-  return {
-    handleDeleteOffer,
-    isDeletingOffer,
-  };
+  return { handleDeleteOffer, isDeletingOffer };
 }
