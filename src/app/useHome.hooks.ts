@@ -74,8 +74,10 @@ export function useHome() {
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["offers"] });
-      await queryClient.refetchQueries({ queryKey: ["offers"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["offers"],
+        exact: true,
+      });
 
       toast({ title: "Success", description: "All offers deleted." });
     },
@@ -101,8 +103,7 @@ export function useHome() {
         return await axios.post(`/api/check-offers`, { userId, userEmail });
       },
       onSuccess: async () => {
-        queryClient.invalidateQueries({ queryKey: ["offers"] });
-        queryClient.removeQueries({ queryKey: ["offers"] });
+        queryClient.invalidateQueries({ queryKey: ["offers"], exact: true });
 
         toast({ title: "Success", description: "Offers refreshed." });
       },
@@ -166,20 +167,20 @@ export function useHome() {
     }
   }
 
-  useEffect(() => {
-    if (!searchParams.get("sort")) {
-      changeUrlParams(
-        "sort",
-        localStorage.getItem("sort") || SORT_STATES[0].value
-      );
-    }
-    if (!searchParams.get("filter")) {
-      changeUrlParams(
-        "filter",
-        localStorage.getItem("filter") || FILTER_STATES[0].value
-      );
-    }
-  }, [changeUrlParams, searchParams]);
+  // useEffect(() => {
+  //   if (!searchParams.get("sort")) {
+  //     changeUrlParams(
+  //       "sort",
+  //       localStorage.getItem("sort") || SORT_STATES[0].value
+  //     );
+  //   }
+  //   if (!searchParams.get("filter")) {
+  //     changeUrlParams(
+  //       "filter",
+  //       localStorage.getItem("filter") || FILTER_STATES[0].value
+  //     );
+  //   }
+  // }, [changeUrlParams, searchParams]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -208,7 +209,7 @@ export function useHome() {
   }, [offerPagesError, toast]);
 
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["offers"] });
+    queryClient.invalidateQueries({ queryKey: ["offers"], exact: true });
   }, [sortState, filtersState, queryClient]);
 
   return {
