@@ -31,14 +31,24 @@ async function fetchAllOffersHandler(req: Request) {
       .sort({ createdAt: sort === "newest" ? -1 : 1 })
       .skip(cursor * limit)
       .limit(limit);
-
+    console.log("MongoDB Query:", {
+      userId,
+      status: filter,
+      name: { $regex: url.searchParams.get("search") || "", $options: "i" },
+    });
     if (offers.length === 0) {
       return NextResponse.json(
         {
           message: "No offers found",
-          offers: { new: [], changed: [], notChanged: [] },
+          offers: [],
           nextCursor: null,
           totalOffers: 0,
+          search: url.searchParams.get("search"),
+          filter,
+          sort,
+          userId,
+          cursor,
+          realOffers: offers,
         },
         {
           status: 200,

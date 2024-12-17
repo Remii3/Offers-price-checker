@@ -16,18 +16,32 @@ export function useOfferItem() {
       offerId: string;
       userId: string;
     }) => {
-      return await axios.delete(`/api/offers/${offerId}`, {
+      await axios.delete(`/api/offers/${offerId}`, {
         data: { userId },
       });
+      return offerId;
     },
-    onSuccess: async () => {
-      queryClient.removeQueries({ queryKey: ["offers"] });
-      await queryClient.invalidateQueries({
-        queryKey: ["offers"],
-        stale: false,
-        refetchType: "all",
+    onSuccess: (deletedOfferId) => {
+      const queries = queryClient.getQueriesData({ queryKey: ["offers"] });
+
+      queries.forEach(([queryKey, oldData]) => {
+        if (!oldData) return;
+
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+          if (!oldData) return oldData;
+          console.log("pages", oldData.pages);
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              offers: page.offers.filter(
+                (offer: any) => offer._id !== deletedOfferId
+              ),
+            })),
+          };
+        });
       });
-      await queryClient.refetchQueries({ queryKey: ["offers"] });
+
       toast({ title: "Success", description: "Offer deleted." });
     },
     onError: (err) => {

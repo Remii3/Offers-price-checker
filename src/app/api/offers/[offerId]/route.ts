@@ -45,8 +45,9 @@ async function deleteOffer(req: Request) {
         message: "User ID and offer ID are required",
       });
     }
-    await Offer.deleteOne({ userId, _id: offerId });
-    return NextResponse.json({ message: "Successfully deleted offer" });
+    const res = await Offer.deleteOne({ userId, _id: offerId });
+
+    return NextResponse.json({ message: "Successfully deleted offer", res });
   } catch (err) {
     if (isAxiosError(err)) {
       console.error(`Error deleting offer`, err.message);
