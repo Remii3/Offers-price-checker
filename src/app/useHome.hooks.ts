@@ -41,7 +41,7 @@ export function useHome() {
       const res = await axios.get<ResponseType>(`/api/offers`, {
         params: {
           skip,
-          limit: 1,
+          limit: Number(process.env.NEXT_PUBLIC_OFFER_LIMIT)!,
           userId: session?.user.id,
           sort: sortState,
           filter: filtersState,
@@ -58,14 +58,10 @@ export function useHome() {
   useEffect(() => {
     if (offersData?.offers) {
       setAllOffers((prev) => {
-        const offerIds = new Set(prev.map((offer) => offer._id));
-        const newOffers = offersData.offers.filter(
-          (offer) => !offerIds.has(offer._id)
-        );
-        return [...prev, ...newOffers];
+        return skip === 0 ? offersData.offers : [...prev, ...offersData.offers];
       });
     }
-  }, [offersData]);
+  }, [offersData, skip]);
 
   const debouncedSearch = useMemo(
     () =>
@@ -153,7 +149,7 @@ export function useHome() {
   );
 
   const loadMoreOffers = () => {
-    setSkip((prev) => prev + 3);
+    setSkip((prev) => prev + Number(process.env.NEXT_PUBLIC_OFFER_LIMIT)!);
   };
 
   function handleSearchChange(search: string) {

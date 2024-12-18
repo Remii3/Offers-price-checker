@@ -12,13 +12,16 @@ async function fetchAllOffersHandler(req: Request) {
     await connectToDatabase();
 
     const url = new URL(req.url);
-    const skip = Number(url.searchParams.get("skip") || 0);
+    const skip = Number(
+      url.searchParams.get("skip") ||
+        Number(process.env.NEXT_PUBLIC_OFFER_LIMIT)!
+    );
     const userId = url.searchParams.get("userId");
     const sort = url.searchParams.get("sort");
     const filter = url.searchParams.get("filter");
-    const limit = 3;
-
-    console.log("skip", skip);
+    const limit =
+      Number(url.searchParams.get("filter")) ||
+      Number(process.env.NEXT_PUBLIC_OFFER_LIMIT)!;
 
     if (!userId || !sort || !filter) {
       return NextResponse.json(
