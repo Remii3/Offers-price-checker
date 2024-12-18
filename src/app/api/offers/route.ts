@@ -56,7 +56,11 @@ async function fetchAllOffersHandler(req: Request) {
       );
     }
 
-    const totalOffers = await Offer.countDocuments({ userId, status: filter });
+    const totalOffers = await Offer.countDocuments({
+      userId,
+      status: filter,
+      name: { $regex: url.searchParams.get("search") || "", $options: "i" },
+    });
 
     return NextResponse.json(
       {

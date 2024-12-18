@@ -60,19 +60,10 @@ export function useHome() {
       setAllOffers((prev) => {
         return skip === 0 ? offersData.offers : [...prev, ...offersData.offers];
       });
+    } else if (skip === 0) {
+      setAllOffers([]);
     }
   }, [offersData, skip]);
-
-  const debouncedSearch = useMemo(
-    () =>
-      debounce((search: string) => {
-        setSearchState(search);
-        setSkip(0);
-        setAllOffers([]);
-        queryClient.invalidateQueries({ queryKey: ["offers"] });
-      }, 500),
-    [queryClient]
-  );
 
   const { mutate: deleteAllOffers, isPending: deleteAllOffersIsLoading } =
     useMutation({
@@ -128,25 +119,36 @@ export function useHome() {
       },
     });
 
-  const handleFilterChange = useCallback(
-    (filter: string) => {
-      setFiltersState(filter);
-      setSkip(0);
-      setAllOffers([]);
-      router.push(`/?filter=${filter}`, { scroll: false });
-    },
-    [router]
-  );
+  function updateQueryParams(key: string, value: string | null) {
+    const searchUrlValue = new URLSearchParams(searchParams.toString());
+    if (value) {
+      searchUrlValue.set(key, value);
+    } else {
+      searchUrlValue.delete(key);
+    }
+    router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
+  }
 
-  const handleSortChange = useCallback(
-    (sort: string) => {
-      setSortState(sort);
-      setSkip(0);
-      setAllOffers([]);
-      router.push(`/?sort=${sort}`, { scroll: false });
-    },
-    [router]
-  );
+  const handleFilterChange = (filter: string) => {
+    updateQueryParams("filter", filter);
+    setFiltersState(filter);
+    setSkip(0);
+    setAllOffers([]);
+  };
+
+  const handleSortChange = (sort: string) => {
+    updateQueryParams("sort", sort);
+
+    setSortState(sort);
+    setSkip(0);
+    setAllOffers([]);
+  };
+
+  const debouncedSearch = debounce((search: string) => {
+    updateQueryParams("search", search);
+    setSkip(0);
+    setSearchState(search);
+  });
 
   const loadMoreOffers = () => {
     setSkip((prev) => prev + Number(process.env.NEXT_PUBLIC_OFFER_LIMIT)!);
@@ -168,50 +170,53 @@ export function useHome() {
       deleteAllOffers(session.user.id);
     }
   }
-  const changeUrlParams = useCallback(
-    (name: string, value: string) => {
-      const searchUrlValue = new URLSearchParams(searchParams.toString());
-
-      if (value) {
-        searchUrlValue.set(name, value);
-      } else {
-        searchUrlValue.delete(name);
-      }
-
-      router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
-    },
-    [router, searchParams]
-  );
 
   useEffect(() => {
     if (!searchParams.get("sort")) {
-      changeUrlParams(
-        "sort",
-        localStorage.getItem("sort") || SORT_STATES[0].value
-      );
+      const localSort = localStorage.getItem("sort") || SORT_STATES[0].value;
+      const searchUrlValue = new URLSearchParams(searchParams.toString());
+      if (localSort) {
+        searchUrlValue.set("sort", localSort);
+      } else {
+        searchUrlValue.delete("sort");
+      }
+      router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
     }
     if (!searchParams.get("filter")) {
-      changeUrlParams(
-        "filter",
-        localStorage.getItem("filter") || FILTER_STATES[0].value
-      );
+      const localFilter =
+        localStorage.getItem("filter") || FILTER_STATES[0].value;
+      const searchUrlValue = new URLSearchParams(searchParams.toString());
+      if (localFilter) {
+        searchUrlValue.set("filter", localFilter);
+      } else {
+        searchUrlValue.delete("filter");
+      }
+      router.push(`/?${searchUrlValue.toString()}`, { scroll: false });
     }
-  }, [changeUrlParams, searchParams]);
+  }, [router, searchParams]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (
+      typeof window !== "undefined" &&
+      filtersState !== searchParams.get("filter")
+    ) {
       setFiltersState(
         searchParams.get("filter") ||
           localStorage.getItem("filter") ||
           FILTER_STATES[0].value
       );
+    }
+    if (
+      typeof window !== "undefined" &&
+      sortState !== searchParams.get("sort")
+    ) {
       setSortState(
         searchParams.get("sort") ||
           localStorage.getItem("sort") ||
           SORT_STATES[0].value
       );
     }
-  }, [searchParams]);
+  }, [filtersState, searchParams, sortState]);
 
   useEffect(() => {
     if (offerPagesError) {
