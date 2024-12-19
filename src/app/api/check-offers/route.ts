@@ -6,7 +6,6 @@ import { isAxiosError } from "axios";
 import { NextResponse } from "next/server";
 import { fetchPrice } from "@/lib/fetchPrice";
 import { OfferType } from "../../../../types/types";
-import { sendNewPriceMail } from "@/lib/mails";
 
 export async function POST(req: Request) {
   try {
@@ -59,10 +58,12 @@ export async function POST(req: Request) {
         continue;
       }
 
-      const updates: Record<string, string | { [key: string]: string }> = {};
+      const updates: Record<
+        string,
+        string | { [key: string]: string | string[] }
+      > = {};
 
       if (!websiteCurrentInfo.price) {
-        updates.$push = { lastPrices: offer.currentPrice };
         updates.currentPrice = "deleted";
         updates.status = "deleted";
       } else if (!offer.currentPrice) {
@@ -70,17 +71,10 @@ export async function POST(req: Request) {
         updates.img = websiteCurrentInfo.img;
         updates.status = "changed";
       } else if (offer.currentPrice !== websiteCurrentInfo.price) {
+        updates.$push = { lastPrices: websiteCurrentInfo.price };
         updates.currentPrice = websiteCurrentInfo.price;
-        updates.status = "changed";
         updates.img = websiteCurrentInfo.img;
-        updates.$push = { lastPrices: offer.currentPrice };
-
-        // sendNewPriceMail({
-        //   ...offer,
-        //   lastPrice: offer.currentPrice,
-        //   currentPrice: websiteCurrentInfo.price || "deleted",
-        //   userEmail,
-        // });
+        updates.status = "changed";
       } else if (
         offer.lastPrices.at(-1) !== offer.currentPrice &&
         offer.status === "changed"
@@ -94,7 +88,6 @@ export async function POST(req: Request) {
         updates.status = "notChanged";
       } else if (offer.status === "new") {
         updates.status = "notChanged";
-        updates.$push = { lastPrices: offer.currentPrice };
       }
 
       if (Object.keys(updates).length > 0) {

@@ -60,8 +60,6 @@ export function useHome() {
       setAllOffers((prev) => {
         return skip === 0 ? offersData.offers : [...prev, ...offersData.offers];
       });
-    } else if (skip === 0) {
-      setAllOffers([]);
     }
   }, [offersData, skip]);
 
@@ -105,8 +103,9 @@ export function useHome() {
       },
       onSuccess: async () => {
         setSkip(0);
-        setAllOffers([]);
-        queryClient.invalidateQueries({ queryKey: ["offers"] });
+        queryClient.invalidateQueries({
+          queryKey: ["offers"],
+        });
 
         toast({ title: "Success", description: "Offers refreshed." });
       },
@@ -247,5 +246,6 @@ export function useHome() {
     loadMoreOffers,
     deleteAllOffersIsLoading,
     setAllOffers,
+    setSkip,
   };
 }

@@ -19,6 +19,7 @@ type OfferListProps = {
   error: Error | null;
   handleSkipChange: () => void;
   setAllOffers: Dispatch<SetStateAction<any[]>>;
+  setSkip: Dispatch<SetStateAction<number>>;
 };
 const ListLoader = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-4">
@@ -59,6 +60,7 @@ export default function OffersList({
   handleSkipChange,
   setAllOffers,
   totalFetched,
+  setSkip,
 }: OfferListProps) {
   return (
     <>
@@ -73,6 +75,7 @@ export default function OffersList({
                   key={offer._id}
                   offer={offer}
                   setAllOffers={setAllOffers}
+                  setSkip={setSkip}
                 />
               );
             })}

@@ -6,8 +6,10 @@ import { Dispatch, SetStateAction } from "react";
 
 export default function useOfferItem({
   setAllOffers,
+  setSkip,
 }: {
   setAllOffers: Dispatch<SetStateAction<any[]>>;
+  setSkip: Dispatch<SetStateAction<number>>;
 }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -28,6 +30,7 @@ export default function useOfferItem({
       return offerId;
     },
     onSuccess: (offerId: string) => {
+      setSkip(0);
       queryClient.invalidateQueries({
         queryKey: ["offers"],
       });

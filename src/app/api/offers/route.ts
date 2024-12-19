@@ -119,6 +119,7 @@ async function createNewOfferHandler(req: NextRequest) {
       url: checkedUrl,
       userId,
       currentPrice: websiteCurrentInfo.price,
+      lastPrices: [websiteCurrentInfo.price],
       img: websiteCurrentInfo.img,
       status: "new",
     });

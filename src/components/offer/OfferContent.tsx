@@ -154,11 +154,13 @@ export default function OfferContent({ offerId }: { offerId: string }) {
               </p>
               <div>
                 <p>Last prices:</p>
-                {offer.lastPrices.length > 0 ? (
+                {offer.lastPrices.length > 1 ? (
                   <ul>
-                    {offer.lastPrices.map((price, i) => (
-                      <li key={price + "price" + i}>{price}</li>
-                    ))}
+                    {offer.lastPrices
+                      .slice(0, offer.lastPrices.length - 1)
+                      .map((price, i) => (
+                        <li key={price + "price" + i}>{price}</li>
+                      ))}
                   </ul>
                 ) : (
                   <p className="text-sm text-muted-foreground">

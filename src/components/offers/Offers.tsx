@@ -30,6 +30,7 @@ export default function Offers() {
     handleSortChange,
     loadMoreOffers,
     setAllOffers,
+    setSkip,
   } = useHome();
   return (
     <div className="h-full mb-4">
@@ -106,6 +107,7 @@ export default function Offers() {
             totalFetched={totalFetched}
             handleSkipChange={loadMoreOffers}
             setAllOffers={setAllOffers}
+            setSkip={setSkip}
           />
         </div>
       </section>

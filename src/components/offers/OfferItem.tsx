@@ -18,12 +18,15 @@ import { Dispatch, SetStateAction } from "react";
 export default function OfferItem({
   offer,
   setAllOffers,
+  setSkip,
 }: {
   offer: OfferType;
   setAllOffers: Dispatch<SetStateAction<any[]>>;
+  setSkip: Dispatch<SetStateAction<number>>;
 }) {
   const { handleDeleteOffer, isDeletingOffer } = useOfferItem({
     setAllOffers,
+    setSkip,
   });
   return (
     <Card>
@@ -51,7 +54,7 @@ export default function OfferItem({
         <p className="text-sm flex justify-between flex-wrap">
           <span>Previous:</span>
           <span>
-            {offer.lastPrices.length > 0 ? offer.lastPrices.at(-1) : "New"}
+            {offer.lastPrices.length > 1 ? offer.lastPrices.at(-2) : "New"}
           </span>
         </p>
       </CardContent>

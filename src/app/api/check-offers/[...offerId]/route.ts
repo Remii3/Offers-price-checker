@@ -1,7 +1,6 @@
 export const fetchCache = "force-no-store";
 
 import { fetchPrice } from "@/lib/fetchPrice";
-import { sendNewPriceMail } from "@/lib/mails";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Offer } from "@/models/offer";
 import { isAxiosError } from "axios";
@@ -51,7 +50,6 @@ async function postOfferRefresh(req: Request) {
     const updates: Record<string, string | { [key: string]: string }> = {};
 
     if (!websiteCurrentInfo.price) {
-      updates.$push = { lastPrices: offer.currentPrice };
       updates.currentPrice = "deleted";
       updates.status = "deleted";
     } else if (!offer.currentPrice) {
@@ -59,17 +57,10 @@ async function postOfferRefresh(req: Request) {
       updates.img = websiteCurrentInfo.img;
       updates.status = "changed";
     } else if (offer.currentPrice !== websiteCurrentInfo.price) {
+      updates.$push = { lastPrices: websiteCurrentInfo.price };
       updates.currentPrice = websiteCurrentInfo.price;
-      updates.status = "changed";
       updates.img = websiteCurrentInfo.img;
-      updates.$push = { lastPrices: offer.currentPrice };
-
-      // sendNewPriceMail({
-      //   ...offer,
-      //   lastPrice: offer.currentPrice,
-      //   currentPrice: websiteCurrentInfo.price || "deleted",
-      //   userEmail,
-      // });
+      updates.status = "changed";
     } else if (
       offer.lastPrices.at(-1) !== offer.currentPrice &&
       offer.status === "changed"
@@ -83,7 +74,6 @@ async function postOfferRefresh(req: Request) {
       updates.status = "notChanged";
     } else if (offer.status === "new") {
       updates.status = "notChanged";
-      updates.$push = { lastPrices: offer.currentPrice };
     }
 
     if (Object.keys(updates).length > 0) {
