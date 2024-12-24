@@ -1,7 +1,7 @@
-import axios, { isAxiosError } from "axios";
-import * as cheerio from "cheerio";
+const axios = require("axios");
+const cheerio = require("cheerio");
 
-export async function fetchPrice({ url }: { url: string }) {
+async function fetchPrice({ url }) {
   try {
     const { data } = await axios.get(url, {
       headers: {
@@ -30,7 +30,7 @@ export async function fetchPrice({ url }: { url: string }) {
 
     for (const key in parsers) {
       if (url.includes(key)) {
-        const result = parsers[key as keyof typeof parsers]();
+        const result = parsers[key]();
         return result;
       }
     }
@@ -41,7 +41,7 @@ export async function fetchPrice({ url }: { url: string }) {
       title: $('meta[property="og:title"]').attr("content") || "",
     };
   } catch (err) {
-    if (isAxiosError(err)) {
+    if (axios.isAxiosError(err)) {
       if (err.status === 403) {
         console.error("They changed security measures, please update the code");
       }
@@ -52,3 +52,5 @@ export async function fetchPrice({ url }: { url: string }) {
     return null;
   }
 }
+
+module.exports = fetchPrice;
