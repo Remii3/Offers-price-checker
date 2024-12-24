@@ -14,7 +14,7 @@ const newOfferSchema = z.object({
   url: z.string().url().min(1),
 });
 
-export function useNewOfferForm() {
+export function useNewOffer() {
   const { toast } = useToast();
   const router = useRouter();
   const { data: userData } = useSession();
@@ -29,10 +29,8 @@ export function useNewOfferForm() {
       userId: string;
       data: z.infer<typeof newOfferSchema>;
     }) => {
-      const res = await axios.post("/api/offers", { ...data, userId });
-      if (res.status >= 400) {
-        throw new Error(res.data.message || "Failed to add offer");
-      }
+      const res = await axios.post("/offers", { ...data, userId });
+
       return res.data;
     },
     onSuccess: async () => {
