@@ -1,9 +1,10 @@
 "use client";
+
 import debounce from "lodash.debounce";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { OfferType } from "../../types/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FILTER_STATES, SORT_STATES } from "@/constants/constants";
@@ -38,7 +39,7 @@ export function useHome() {
   } = useQuery({
     queryKey: ["offers", skip, filtersState, sortState, searchState],
     queryFn: async () => {
-      const res = await axios.get<ResponseType>(`/api/offers`, {
+      const res = await axios.get<ResponseType>(`/offers`, {
         params: {
           skip,
           limit: Number(process.env.NEXT_PUBLIC_OFFER_LIMIT)!,
@@ -67,13 +68,14 @@ export function useHome() {
     useMutation({
       mutationKey: ["deleteAllOffers"],
       mutationFn: async (userId: string) => {
-        return await axios.delete(`/api/offers`, {
+        const res = await axios.delete(`/offers`, {
           data: { userId, filtersState },
         });
+        return res.data;
       },
       onSuccess: () => {
-        setSkip(0);
         setAllOffers([]);
+        setSkip(0);
         queryClient.invalidateQueries({
           queryKey: ["offers"],
         });
@@ -99,7 +101,11 @@ export function useHome() {
         userId: string;
         userEmail: string;
       }) => {
-        return await axios.post(`/api/check-offers`, { userId, userEmail });
+        const res = await axios.post(`/check-offers`, {
+          userId,
+          userEmail,
+        });
+        return res.data;
       },
       onSuccess: async () => {
         setSkip(0);

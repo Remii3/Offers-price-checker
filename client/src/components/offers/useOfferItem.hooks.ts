@@ -24,7 +24,7 @@ export default function useOfferItem({
       offerId: string;
       userId: string;
     }) => {
-      await axios.delete(`/api/offers/${offerId}`, {
+      await axios.delete(`/offers/${offerId}`, {
         data: { userId },
       });
       return offerId;

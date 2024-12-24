@@ -1,11 +1,22 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Offer = require("./models/Offer");
-const { fetchPrice } = require("./lib/fetchPrice");
-
+const fetchPrice = require("./lib/fetchPrice");
+const dotenv = require("dotenv");
+const axios = require("axios");
 const app = express();
+const cors = require("cors");
+dotenv.config();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_BASE_URL,
+    credentials: true,
+  })
+);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -37,7 +48,7 @@ router.post("/check-offers", async (req, res) => {
           const websiteCurrentInfo = await fetchPrice({ url: offer.url });
           return { offer, websiteCurrentInfo };
         } catch (err) {
-          if (isAxiosError(err)) {
+          if (axios.isAxiosError(err)) {
             console.error(
               `Error fetching price for ${offer.url}:`,
               err.message
@@ -244,7 +255,7 @@ router.get("/offers", async (req, res) => {
 });
 
 router.get("/offers/:offerId", async (req, res) => {
-  const { userId } = req.query();
+  const { userId } = req.query;
   const { offerId } = req.params;
   if (!userId || !offerId) {
     return res.status(400).json({ message: "Missing variables" });
@@ -276,13 +287,14 @@ router.delete("/offers", async (req, res) => {
 });
 
 router.delete("/offers/:offerId", async (req, res) => {
-  const { userid } = req.body;
+  const { userId } = req.body;
   const { offerId } = req.params;
-  if (!userid || !offerId) {
+  if (!userId || !offerId) {
+    console.error("Missing variables", userId, offerId);
     return res.status(400).json({ message: "Missing variables" });
   }
   try {
-    await Offer.deleteOne({ _id: offerId, userId: userid });
+    await Offer.deleteOne({ _id: offerId, userId: userId });
 
     return res.status(200).json({ message: "Offer deleted" });
   } catch (err) {

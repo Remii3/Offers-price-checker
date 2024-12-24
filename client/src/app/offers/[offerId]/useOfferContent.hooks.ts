@@ -3,12 +3,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { OfferType } from "../../../types/types";
+import { OfferType } from "../../../../types/types";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
+
+const normalizePrices = (data: string[] | undefined) => {
+  if (!data) return [];
+  return data.map((price, index) => {
+    const cleanedPrice = price.replace(/[^0-9.]/g, "").replace(/\s+/g, "");
+    const numericValue = parseFloat(cleanedPrice) || 0;
+
+    return { index: index + 1, price: numericValue };
+  });
+};
 
 type OfferResponse = {
-  offerData: OfferType;
+  offer: OfferType;
 };
 
 export default function useOfferContent({ offerId }: { offerId: string }) {
@@ -23,12 +34,12 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
   } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: async () => {
-      const res = await axios.get<OfferResponse>(`/api/offers/${offerId}`, {
+      const res = await axios.get<OfferResponse>(`/offers/${offerId}`, {
         params: {
           userId: session?.user.id,
         },
       });
-      return res.data.offerData;
+      return res.data.offer;
     },
     enabled: !!offerId && !!session?.user.id,
   });
@@ -46,7 +57,7 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
       userId: string;
       userEmail: string;
     }) => {
-      const res = await axios.post(`/api/check-offers/${offerId}`, {
+      const res = await axios.post(`/check-offers/${offerId}`, {
         userId,
         offerId,
         userEmail,
@@ -70,13 +81,13 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
   } = useMutation({
     mutationKey: ["offerDelete"],
     mutationFn: async ({ userId }: { userId: string }) => {
-      const res = await axios.delete(`/api/offers/${offerId}`, {
+      const res = await axios.delete(`/offers/${offerId}`, {
         data: { userId },
       });
       return res.data;
     },
     onSuccess: () => {
-      router.back();
+      router.push("/");
       toast({ title: "Success", description: "Offer deleted" });
     },
     onError: (err) => {
@@ -100,6 +111,10 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     }
   }
 
+  const chartData = useMemo(
+    () => normalizePrices(offer?.lastPrices),
+    [offer?.lastPrices]
+  );
   return {
     offer,
     isPending,
@@ -110,5 +125,6 @@ export default function useOfferContent({ offerId }: { offerId: string }) {
     handleDeleteOffer,
     isDeleting,
     deleteError,
+    chartData,
   };
 }
