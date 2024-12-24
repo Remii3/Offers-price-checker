@@ -193,7 +193,7 @@ router.post("/check-offers/:offerId", async (req, res) => {
 
 router.post("/offers", async (req, res) => {
   const { name, url, userId } = req.body;
-  if (!name || !url || !userId) {
+  if (!url || !userId) {
     return res.status(400).json({ message: "Missing variables" });
   }
   const transformedUrl = url.trim();
