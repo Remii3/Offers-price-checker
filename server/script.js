@@ -73,7 +73,7 @@ router.post("/check-offers", async (req, res) => {
 
       const updates = {};
 
-      if (!websiteCurrentInfo.price) {
+      if (!websiteCurrentInfo.price || websiteCurrentInfo.price.trim() === "") {
         updates.currentPrice = "deleted";
         updates.status = "deleted";
       } else if (!offer.currentPrice) {
@@ -144,7 +144,7 @@ router.post("/check-offers/:offerId", async (req, res) => {
 
     const updates = {};
 
-    if (!websiteCurrentInfo.price) {
+    if (!websiteCurrentInfo.price || websiteCurrentInfo.price.trim() === "") {
       updates.currentPrice = "deleted";
       updates.status = "deleted";
     } else if (!offer.currentPrice) {
@@ -200,13 +200,23 @@ router.post("/offers", async (req, res) => {
 
   try {
     const websiteCurrentInfo = await fetchPrice({ url: transformedUrl });
+
     if (!websiteCurrentInfo) {
-      return res.status(400).json({ message: "Invalid URL" });
+      return res
+        .status(400)
+        .json({ message: "Invalid URL, offer could be deleted" });
     }
 
-    const offer = new Offer({
-      name: name || websiteCurrentInfo.name || "No title",
+    if (!websiteCurrentInfo.price || websiteCurrentInfo.price.trim() === "") {
+      return res
+        .status(400)
+        .json({ message: "Invalid URL, offer could be deleted" });
+    }
+
+    const offer = await Offer.create({
+      name: name || websiteCurrentInfo.title || "No title",
       url: transformedUrl,
+      img: websiteCurrentInfo.img,
       userId,
       currentPrice: websiteCurrentInfo.price,
       lastPrices: [websiteCurrentInfo.price],
